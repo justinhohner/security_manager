@@ -16,6 +16,7 @@ Use sequential filenames:
 
 - `0001-<short-topic>.md`
 - `0002-<short-topic>.md`
+- `0003-<short-topic>.md`
 
 ## Suggested Process
 
@@ -33,3 +34,9 @@ The first ADRs likely needed for this project are:
 - finding prioritization model
 - scan integration strategy
 - human approval points for agent actions
+
+Current ADRs:
+
+- `0001-record-architecture-decisions.md`
+- `0002-onboarding-interaction-model.md`
+- `0003-adopt-program-first-product-model.md`
