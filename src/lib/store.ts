@@ -1,11 +1,11 @@
 // ABOUTME: Persists engagement workflow state through Prisma for the first slice.
 // ABOUTME: Keeps onboarding, boundary state, assessment detail, and findings aligned.
 import { buildAssessmentState, buildFindingInput, buildRequirementDetailState } from "@/lib/assessment";
-import { buildCapabilityDetailState, buildInitiativeInput, buildProgramBaselineState } from "@/lib/program";
+import { buildCapabilityDetailState, buildInitiativeDetailState, buildInitiativeInput, buildProgramBaselineState } from "@/lib/program";
 import { prisma } from "@/lib/prisma";
 import { BASELINE_QUESTIONS, SECTION_ORDER, buildBoundarySummary, buildFollowUpQuestions, buildSectionStatuses } from "@/lib/onboarding";
 import { buildManualSystems, mapAnswers, mapEvidenceReferences, resolveBoundarySummary, synchronizeBoundary } from "@/lib/persistence";
-import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type CapabilityDetailState, type Engagement, type EvidenceReferenceInput, type Finding, type Initiative, type OnboardingState, type ProgramBaselineState, type RequirementDetailState, type SectionId } from "@/lib/types";
+import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type CapabilityDetailState, type Engagement, type EvidenceReferenceInput, type Finding, type Initiative, type InitiativeDetailState, type OnboardingState, type ProgramBaselineState, type RequirementDetailState, type SectionId } from "@/lib/types";
 
 export async function listEngagements(): Promise<Engagement[]> {
   const engagements = await prisma.engagement.findMany({
@@ -249,6 +249,51 @@ export async function createInitiativeCandidate(
   });
 
   return getProgramBaselineState(engagementId);
+}
+
+export async function getInitiativeDetailState(
+  engagementId: string,
+  initiativeId: string,
+): Promise<InitiativeDetailState | undefined> {
+  const engagement = await getEngagement(engagementId);
+
+  if (!engagement) {
+    return undefined;
+  }
+
+  const initiative = await prisma.initiative.findUnique({
+    where: { id: initiativeId },
+  });
+
+  if (!initiative || initiative.engagementId !== engagementId) {
+    return undefined;
+  }
+
+  return buildInitiativeDetailState({
+    engagement,
+    initiative: mapInitiativeRecord(initiative),
+  });
+}
+
+export async function updateInitiativeStatus(
+  engagementId: string,
+  initiativeId: string,
+  status: Initiative["status"],
+): Promise<InitiativeDetailState | undefined> {
+  const existing = await prisma.initiative.findUnique({
+    where: { id: initiativeId },
+  });
+
+  if (!existing || existing.engagementId !== engagementId) {
+    return undefined;
+  }
+
+  await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: { status },
+  });
+
+  return getInitiativeDetailState(engagementId, initiativeId);
 }
 
 export async function updateBoundary(
@@ -549,7 +594,7 @@ function mapInitiativeRecord(record: InitiativeRecord): Initiative {
     summary: record.summary,
     priority: record.priority as Initiative["priority"],
     targetCapabilityIds: record.targetCapabilityIds,
-    status: record.status,
+    status: record.status as Initiative["status"],
     createdAt: record.createdAt.toISOString(),
   };
 }

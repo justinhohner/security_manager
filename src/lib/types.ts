@@ -225,7 +225,7 @@ export interface Initiative {
   summary: string;
   priority: "do-now" | "do-next" | "plan-this-quarter";
   targetCapabilityIds: string[];
-  status: string;
+  status: "candidate" | "planned" | "in-progress";
   createdAt: string;
 }
 
@@ -245,4 +245,12 @@ export interface ProgramBaselineState {
 export interface CapabilityDetailState {
   engagement: Engagement;
   capability: CapabilityDetail;
+}
+
+export interface InitiativeDetailState {
+  engagement: Engagement;
+  initiative: Initiative & {
+    whyNow: string;
+    nextStatusOptions: Array<"planned" | "in-progress">;
+  };
 }

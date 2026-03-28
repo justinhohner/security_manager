@@ -125,6 +125,12 @@ export function ProgramWorkspace({ state }: { state: ProgramBaselineState }) {
                     <p className={styles.copy}>
                       <strong>Status:</strong> {initiative.status}
                     </p>
+                    <Link
+                      className={styles.detailLink}
+                      href={`/engagements/${currentState.engagement.id}/program/initiatives/${initiative.id}`}
+                    >
+                      Open initiative detail
+                    </Link>
                   </div>
                 ))}
               </div>

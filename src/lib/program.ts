@@ -6,6 +6,8 @@ import type {
   CapabilityDetailState,
   Engagement,
   EvidenceReference,
+  Initiative,
+  InitiativeDetailState,
   InitiativePreview,
   ProgramBaselineState,
 } from "@/lib/types";
@@ -79,6 +81,20 @@ export function buildInitiativeInput(preview: InitiativePreview) {
     priority: preview.priority,
     targetCapabilityIds: preview.targetCapabilityIds,
     status: "candidate",
+  };
+}
+
+export function buildInitiativeDetailState(input: {
+  engagement: Engagement;
+  initiative: Initiative;
+}): InitiativeDetailState {
+  return {
+    engagement: input.engagement,
+    initiative: {
+      ...input.initiative,
+      whyNow: `This initiative is currently prioritized as ${input.initiative.priority.replaceAll("-", " ")} because it addresses a near-term program need.`,
+      nextStatusOptions: buildNextStatusOptions(input.initiative.status),
+    },
   };
 }
 
@@ -268,6 +284,18 @@ function buildWhyItMatters(capabilityId: string) {
   };
 
   return messages[capabilityId] ?? "This capability influences the health of the overall security program.";
+}
+
+function buildNextStatusOptions(status: Initiative["status"]): Array<"planned" | "in-progress"> {
+  if (status === "candidate") {
+    return ["planned", "in-progress"];
+  }
+
+  if (status === "planned") {
+    return ["in-progress"];
+  }
+
+  return [];
 }
 
 function buildEvidenceSignals(

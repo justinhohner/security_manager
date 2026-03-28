@@ -2,7 +2,7 @@
 // ABOUTME: Keeps capability and roadmap preview logic aligned to the new product direction.
 import { describe, expect, it } from "vitest";
 import { answerToRecord, buildBoundarySummary } from "@/lib/onboarding";
-import { buildCapabilityDetailState, buildInitiativeInput, buildProgramBaselineState } from "@/lib/program";
+import { buildCapabilityDetailState, buildInitiativeDetailState, buildInitiativeInput, buildProgramBaselineState } from "@/lib/program";
 
 const engagement = {
   id: "eng-1",
@@ -115,5 +115,27 @@ describe("buildInitiativeInput", () => {
       targetCapabilityIds: ["governance-policy"],
       status: "candidate",
     });
+  });
+});
+
+describe("buildInitiativeDetailState", () => {
+  it("builds initiative detail with next status options", () => {
+    const detail = buildInitiativeDetailState({
+      engagement,
+      initiative: {
+        id: "initiative-1",
+        engagementId: "eng-1",
+        title: "Stabilize governance and policy baseline",
+        summary:
+          "Program maturity is low, so the consultant needs a stronger governance baseline before larger improvements will stick.",
+        priority: "do-now",
+        targetCapabilityIds: ["governance-policy"],
+        status: "candidate",
+        createdAt: "2026-03-28T00:00:00.000Z",
+      },
+    });
+
+    expect(detail.initiative.whyNow).toContain("do now");
+    expect(detail.initiative.nextStatusOptions).toEqual(["planned", "in-progress"]);
   });
 });

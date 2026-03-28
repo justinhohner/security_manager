@@ -8,3 +8,4 @@
 - Created issue #8 for the program-first workspace scaffold and added a parallel `/program` route with derived capability baseline and roadmap preview.
 - Added read-only capability detail pages under the program workspace so capability cards now drill into rationale, evidence signals, and linked next actions.
 - Added saved initiative candidates to the program workspace so roadmap preview items can now be promoted into tracked planning records.
+- Added initiative detail pages and simple status transitions so saved initiative candidates can move into planned and in-progress states.
