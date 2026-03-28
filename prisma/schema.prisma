@@ -44,6 +44,11 @@ model AssessmentBoundary {
   exclusions        String[]
   unresolvedScope   String[]
   confidence        Int         @default(1)
+  summaryManual     Boolean     @default(false)
+  assumptionsManual Boolean     @default(false)
+  exclusionsManual  Boolean     @default(false)
+  confidenceManual  Boolean     @default(false)
+  systemsManual     Boolean     @default(false)
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   engagement        Engagement  @relation(fields: [engagementId], references: [id])

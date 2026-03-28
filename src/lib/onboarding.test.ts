@@ -2,6 +2,7 @@
 // ABOUTME: Protects the core slice logic from silent behavior drift.
 import { describe, expect, it } from "vitest";
 import { answerToRecord, buildBoundarySummary, buildFollowUpQuestions, buildSystemSnapshots } from "@/lib/onboarding";
+import { buildManualSystems, resolveBoundarySummary } from "@/lib/persistence";
 import type { Answer } from "@/lib/types";
 
 describe("buildFollowUpQuestions", () => {
@@ -97,5 +98,60 @@ describe("buildSystemSnapshots", () => {
         protectsCui: false,
       },
     ]);
+  });
+});
+
+describe("buildManualSystems", () => {
+  it("marks protected systems inside the manually supplied in-scope list", () => {
+    expect(buildManualSystems(["Microsoft 365", "Jira"], ["Jira"])).toEqual([
+      {
+        name: "Microsoft 365",
+        storesCui: false,
+        processesCui: false,
+        transmitsCui: false,
+        protectsCui: false,
+      },
+      {
+        name: "Jira",
+        storesCui: false,
+        processesCui: false,
+        transmitsCui: false,
+        protectsCui: true,
+      },
+    ]);
+  });
+});
+
+describe("resolveBoundarySummary", () => {
+  it("preserves manually edited fields while keeping derived scope signals", () => {
+    const resolved = resolveBoundarySummary(
+      {
+        summary: "Derived summary",
+        includesCui: true,
+        includesFci: false,
+        assumptions: ["Derived assumption"],
+        exclusions: ["Derived exclusion"],
+        unresolvedScopeQuestions: ["Derived gap"],
+        inScopeSystems: ["Microsoft 365"],
+        protectedSystems: ["Microsoft 365"],
+        confidence: 2,
+      },
+      {
+        summary: "Manual summary",
+        assumptions: ["Manual assumption"],
+        exclusions: ["Manual exclusion"],
+        confidence: 4,
+        summaryManual: true,
+        assumptionsManual: true,
+        exclusionsManual: false,
+        confidenceManual: true,
+      },
+    );
+
+    expect(resolved.summary).toBe("Manual summary");
+    expect(resolved.assumptions).toEqual(["Manual assumption"]);
+    expect(resolved.exclusions).toEqual(["Derived exclusion"]);
+    expect(resolved.confidence).toBe(4);
+    expect(resolved.unresolvedScopeQuestions).toEqual(["Derived gap"]);
   });
 });

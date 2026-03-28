@@ -2,8 +2,8 @@
 // ABOUTME: Keeps onboarding, boundary state, and seeded sample data aligned.
 import { prisma } from "@/lib/prisma";
 import { BASELINE_QUESTIONS, SECTION_ORDER, buildBoundarySummary, buildFollowUpQuestions, buildSectionStatuses } from "@/lib/onboarding";
-import { mapAnswers, synchronizeBoundary } from "@/lib/persistence";
-import { type AnswerInput, type BoundarySummary, type Engagement, type OnboardingState, type SectionId } from "@/lib/types";
+import { buildManualSystems, mapAnswers, resolveBoundarySummary, synchronizeBoundary } from "@/lib/persistence";
+import { type AnswerInput, type BoundarySummary, type BoundaryUpdateInput, type Engagement, type OnboardingState, type SectionId } from "@/lib/types";
 
 export async function listEngagements(): Promise<Engagement[]> {
   const engagements = await prisma.engagement.findMany({
@@ -90,16 +90,12 @@ export async function getOnboardingState(engagementId: string): Promise<Onboardi
   const derivedBoundary = buildBoundarySummary(answerMap);
   const boundaryPreview = engagement.boundary
     ? {
-        ...derivedBoundary,
-        summary: engagement.boundary.summary,
+        ...resolveBoundarySummary(derivedBoundary, engagement.boundary),
         includesCui: engagement.boundary.includesCui,
         includesFci: engagement.boundary.includesFci,
-        assumptions: engagement.boundary.assumptions,
-        exclusions: engagement.boundary.exclusions,
         unresolvedScopeQuestions: engagement.boundary.unresolvedScope,
         inScopeSystems: engagement.systems.map((system) => system.name),
         protectedSystems: engagement.systems.filter((system) => system.protectsCui).map((system) => system.name),
-        confidence: engagement.boundary.confidence,
       }
     : derivedBoundary;
 
@@ -157,6 +153,98 @@ export async function saveAnswer(
 export async function getBoundarySummary(engagementId: string): Promise<BoundarySummary | undefined> {
   const state = await getOnboardingState(engagementId);
   return state?.boundaryPreview;
+}
+
+export async function updateBoundary(
+  engagementId: string,
+  input: BoundaryUpdateInput,
+): Promise<OnboardingState | undefined> {
+  const engagement = await prisma.engagement.findUnique({
+    where: { id: engagementId },
+    include: {
+      answers: true,
+      boundary: true,
+      systems: true,
+    },
+  });
+
+  if (!engagement) {
+    return undefined;
+  }
+
+  const answerMap = mapAnswers(engagement.answers);
+  const derivedBoundary = buildBoundarySummary(answerMap);
+  const existingBoundary = engagement.boundary;
+  const nextBoundary = {
+    summary: input.summary?.trim() || derivedBoundary.summary,
+    assumptions: input.assumptions ?? existingBoundary?.assumptions ?? derivedBoundary.assumptions,
+    exclusions: input.exclusions ?? existingBoundary?.exclusions ?? derivedBoundary.exclusions,
+    confidence: input.confidence ?? existingBoundary?.confidence ?? derivedBoundary.confidence,
+    inScopeSystems:
+      input.inScopeSystems ??
+      (engagement.systems.length > 0 ? engagement.systems.map((system) => system.name) : derivedBoundary.inScopeSystems),
+    protectedSystems:
+      input.protectedSystems ??
+      (engagement.systems.length > 0
+        ? engagement.systems.filter((system) => system.protectsCui).map((system) => system.name)
+        : derivedBoundary.protectedSystems),
+  };
+
+  const systems = buildManualSystems(nextBoundary.inScopeSystems, nextBoundary.protectedSystems);
+
+  await prisma.$transaction([
+    prisma.assessmentBoundary.upsert({
+      where: { engagementId },
+      create: {
+        engagementId,
+        summary: nextBoundary.summary,
+        includesCui: derivedBoundary.includesCui,
+        includesFci: derivedBoundary.includesFci,
+        assumptions: nextBoundary.assumptions,
+        exclusions: nextBoundary.exclusions,
+        unresolvedScope: derivedBoundary.unresolvedScopeQuestions,
+        confidence: nextBoundary.confidence,
+        summaryManual: "summary" in input,
+        assumptionsManual: "assumptions" in input,
+        exclusionsManual: "exclusions" in input,
+        confidenceManual: "confidence" in input,
+        systemsManual: "inScopeSystems" in input || "protectedSystems" in input,
+      },
+      update: {
+        summary: nextBoundary.summary,
+        includesCui: derivedBoundary.includesCui,
+        includesFci: derivedBoundary.includesFci,
+        assumptions: nextBoundary.assumptions,
+        exclusions: nextBoundary.exclusions,
+        unresolvedScope: derivedBoundary.unresolvedScopeQuestions,
+        confidence: nextBoundary.confidence,
+        summaryManual: "summary" in input ? true : existingBoundary?.summaryManual ?? false,
+        assumptionsManual: "assumptions" in input ? true : existingBoundary?.assumptionsManual ?? false,
+        exclusionsManual: "exclusions" in input ? true : existingBoundary?.exclusionsManual ?? false,
+        confidenceManual: "confidence" in input ? true : existingBoundary?.confidenceManual ?? false,
+        systemsManual:
+          "inScopeSystems" in input || "protectedSystems" in input
+            ? true
+            : existingBoundary?.systemsManual ?? false,
+      },
+    }),
+    prisma.system.deleteMany({
+      where: { engagementId },
+    }),
+    prisma.system.createMany({
+      data: systems.map((system) => ({
+        engagementId,
+        name: system.name,
+        storesCui: system.storesCui,
+        processesCui: system.processesCui,
+        transmitsCui: system.transmitsCui,
+        protectsCui: system.protectsCui,
+      })),
+      skipDuplicates: true,
+    }),
+  ]);
+
+  return getOnboardingState(engagementId);
 }
 
 async function synchronizeEngagementFields(engagementId: string, input: AnswerInput) {

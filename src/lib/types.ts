@@ -74,6 +74,15 @@ export interface BoundarySummary {
   confidence: number;
 }
 
+export interface BoundaryUpdateInput {
+  summary?: string;
+  assumptions?: string[];
+  exclusions?: string[];
+  inScopeSystems?: string[];
+  protectedSystems?: string[];
+  confidence?: number;
+}
+
 export interface OnboardingState {
   engagement: Engagement;
   sections: SectionStatus[];

@@ -197,6 +197,30 @@
   margin-top: 8px;
 }
 
+.boundaryActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryButton {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.primaryButton {
+  color: white;
+  background: linear-gradient(135deg, #0e5a5a, #1d7f74);
+  border-color: transparent;
+}
+
+.secondaryButton {
+  background: white;
+}
+
 @media (max-width: 1080px) {
   .workspace {
     grid-template-columns: 1fr;

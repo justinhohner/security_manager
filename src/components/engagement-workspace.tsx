@@ -13,6 +13,15 @@ type SaveAnswerResponse = {
 export function EngagementWorkspace({ initialState }: { initialState: OnboardingState }) {
   const [state, setState] = useState(initialState);
   const [isSaving, setIsSaving] = useState<string | null>(null);
+  const [isBoundaryEditing, setIsBoundaryEditing] = useState(false);
+  const [boundaryDraft, setBoundaryDraft] = useState({
+    summary: initialState.boundaryPreview.summary,
+    assumptions: initialState.boundaryPreview.assumptions.join("\n"),
+    exclusions: initialState.boundaryPreview.exclusions.join("\n"),
+    inScopeSystems: initialState.boundaryPreview.inScopeSystems.join("\n"),
+    protectedSystems: initialState.boundaryPreview.protectedSystems.join("\n"),
+    confidence: String(initialState.boundaryPreview.confidence),
+  });
 
   const currentQuestions = state.questions.filter((question) => question.sectionId === state.currentSectionId);
   const activeSection = state.sections.find((section) => section.id === state.currentSectionId);
@@ -43,7 +52,44 @@ export function EngagementWorkspace({ initialState }: { initialState: Onboarding
 
     const data = (await response.json()) as SaveAnswerResponse;
     setState(data.state);
+    syncBoundaryDraft(data.state);
     setIsSaving(null);
+  }
+
+  async function handleBoundarySave() {
+    setIsSaving("boundary");
+
+    const response = await fetch(`/api/engagements/${state.engagement.id}/boundary`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        summary: boundaryDraft.summary,
+        assumptions: splitLines(boundaryDraft.assumptions),
+        exclusions: splitLines(boundaryDraft.exclusions),
+        inScopeSystems: splitLines(boundaryDraft.inScopeSystems),
+        protectedSystems: splitLines(boundaryDraft.protectedSystems),
+        confidence: Number(boundaryDraft.confidence),
+      }),
+    });
+
+    const data = (await response.json()) as SaveAnswerResponse;
+    setState(data.state);
+    syncBoundaryDraft(data.state);
+    setIsBoundaryEditing(false);
+    setIsSaving(null);
+  }
+
+  function syncBoundaryDraft(nextState: OnboardingState) {
+    setBoundaryDraft({
+      summary: nextState.boundaryPreview.summary,
+      assumptions: nextState.boundaryPreview.assumptions.join("\n"),
+      exclusions: nextState.boundaryPreview.exclusions.join("\n"),
+      inScopeSystems: nextState.boundaryPreview.inScopeSystems.join("\n"),
+      protectedSystems: nextState.boundaryPreview.protectedSystems.join("\n"),
+      confidence: String(nextState.boundaryPreview.confidence),
+    });
   }
 
   return (
@@ -116,29 +162,124 @@ export function EngagementWorkspace({ initialState }: { initialState: Onboarding
           <div className={styles.summaryCard}>
             <p className={styles.kicker}>Boundary preview</p>
             <h3>Current scope signal</h3>
-            <p className={styles.subtle}>{state.boundaryPreview.summary}</p>
+            {isBoundaryEditing ? (
+              <textarea
+                className={styles.textarea}
+                onChange={(event) =>
+                  setBoundaryDraft((draft) => ({ ...draft, summary: event.currentTarget.value }))
+                }
+                rows={4}
+                value={boundaryDraft.summary}
+              />
+            ) : (
+              <p className={styles.subtle}>{state.boundaryPreview.summary}</p>
+            )}
           </div>
 
           <div className={styles.summaryCard}>
             <h3>Assumptions</h3>
-            <ul>
-              {state.boundaryPreview.assumptions.length > 0 ? (
-                state.boundaryPreview.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)
-              ) : (
-                <li>No explicit assumptions recorded yet.</li>
-              )}
-            </ul>
+            {isBoundaryEditing ? (
+              <textarea
+                className={styles.textarea}
+                onChange={(event) =>
+                  setBoundaryDraft((draft) => ({ ...draft, assumptions: event.currentTarget.value }))
+                }
+                rows={4}
+                value={boundaryDraft.assumptions}
+              />
+            ) : (
+              <ul>
+                {state.boundaryPreview.assumptions.length > 0 ? (
+                  state.boundaryPreview.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)
+                ) : (
+                  <li>No explicit assumptions recorded yet.</li>
+                )}
+              </ul>
+            )}
           </div>
 
           <div className={styles.summaryCard}>
             <h3>In-scope systems</h3>
-            <ul>
-              {state.boundaryPreview.inScopeSystems.length > 0 ? (
-                state.boundaryPreview.inScopeSystems.map((system) => <li key={system}>{system}</li>)
-              ) : (
-                <li>No systems named yet.</li>
-              )}
-            </ul>
+            {isBoundaryEditing ? (
+              <textarea
+                className={styles.textarea}
+                onChange={(event) =>
+                  setBoundaryDraft((draft) => ({ ...draft, inScopeSystems: event.currentTarget.value }))
+                }
+                rows={4}
+                value={boundaryDraft.inScopeSystems}
+              />
+            ) : (
+              <ul>
+                {state.boundaryPreview.inScopeSystems.length > 0 ? (
+                  state.boundaryPreview.inScopeSystems.map((system) => <li key={system}>{system}</li>)
+                ) : (
+                  <li>No systems named yet.</li>
+                )}
+              </ul>
+            )}
+          </div>
+
+          <div className={styles.summaryCard}>
+            <h3>Protected systems</h3>
+            {isBoundaryEditing ? (
+              <textarea
+                className={styles.textarea}
+                onChange={(event) =>
+                  setBoundaryDraft((draft) => ({ ...draft, protectedSystems: event.currentTarget.value }))
+                }
+                rows={3}
+                value={boundaryDraft.protectedSystems}
+              />
+            ) : (
+              <ul>
+                {state.boundaryPreview.protectedSystems.length > 0 ? (
+                  state.boundaryPreview.protectedSystems.map((system) => <li key={system}>{system}</li>)
+                ) : (
+                  <li>No protected systems identified yet.</li>
+                )}
+              </ul>
+            )}
+          </div>
+
+          <div className={styles.summaryCard}>
+            <h3>Exclusions and confidence</h3>
+            {isBoundaryEditing ? (
+              <>
+                <textarea
+                  className={styles.textarea}
+                  onChange={(event) =>
+                    setBoundaryDraft((draft) => ({ ...draft, exclusions: event.currentTarget.value }))
+                  }
+                  rows={3}
+                  value={boundaryDraft.exclusions}
+                />
+                <select
+                  className={styles.select}
+                  onChange={(event) =>
+                    setBoundaryDraft((draft) => ({ ...draft, confidence: event.currentTarget.value }))
+                  }
+                  value={boundaryDraft.confidence}
+                >
+                  {[1, 2, 3, 4, 5].map((score) => (
+                    <option key={score} value={score}>
+                      Confidence {score}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : (
+              <>
+                <ul>
+                  {state.boundaryPreview.exclusions.length > 0 ? (
+                    state.boundaryPreview.exclusions.map((item) => <li key={item}>{item}</li>)
+                  ) : (
+                    <li>No exclusions recorded yet.</li>
+                  )}
+                </ul>
+                <p className={styles.subtle}>Current confidence: {state.boundaryPreview.confidence}/5</p>
+              </>
+            )}
           </div>
 
           <div className={styles.summaryCard}>
@@ -151,10 +292,41 @@ export function EngagementWorkspace({ initialState }: { initialState: Onboarding
               )}
             </ul>
           </div>
+
+          <div className={styles.summaryCard}>
+            <div className={styles.boundaryActions}>
+              <button
+                className={styles.secondaryButton}
+                onClick={() => {
+                  syncBoundaryDraft(state);
+                  setIsBoundaryEditing((value) => !value);
+                }}
+                type="button"
+              >
+                {isBoundaryEditing ? "Cancel boundary edits" : "Edit boundary"}
+              </button>
+              {isBoundaryEditing ? (
+                <button
+                  className={styles.primaryButton}
+                  onClick={() => void handleBoundarySave()}
+                  type="button"
+                >
+                  {isSaving === "boundary" ? "Saving boundary..." : "Save boundary"}
+                </button>
+              ) : null}
+            </div>
+          </div>
         </aside>
       </section>
     </main>
   );
+}
+
+function splitLines(value: string) {
+  return value
+    .split("\n")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
 }
 
 function QuestionField({
