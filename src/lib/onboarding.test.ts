@@ -1,0 +1,63 @@
+// ABOUTME: Tests deterministic onboarding follow-up and boundary summary rules.
+// ABOUTME: Protects the core slice logic from silent behavior drift.
+import { describe, expect, it } from "vitest";
+import { answerToRecord, buildBoundarySummary, buildFollowUpQuestions } from "@/lib/onboarding";
+import type { Answer } from "@/lib/types";
+
+describe("buildFollowUpQuestions", () => {
+  it("adds CUI and outsourced IT follow-ups when the triggering answers are present", () => {
+    const answers: Record<string, Answer> = {
+      "handles-cui": answerToRecord("eng-1", {
+        questionId: "handles-cui",
+        value: "true",
+      }),
+      "outsourced-it": answerToRecord("eng-1", {
+        questionId: "outsourced-it",
+        value: "true",
+      }),
+      "security-program-maturity": answerToRecord("eng-1", {
+        questionId: "security-program-maturity",
+        score: 4,
+      }),
+    };
+
+    const followUps = buildFollowUpQuestions(answers);
+
+    expect(followUps["handles-cui"][0]?.id).toBe("cui-storage-location");
+    expect(followUps["outsourced-it"][0]?.id).toBe("outsourced-it-provider");
+    expect(followUps["security-program-maturity"][0]?.id).toBe("security-program-evidence");
+  });
+});
+
+describe("buildBoundarySummary", () => {
+  it("flags unresolved scope questions when CUI exists without handling detail", () => {
+    const answers: Record<string, Answer> = {
+      "handles-cui": answerToRecord("eng-1", {
+        questionId: "handles-cui",
+        value: "true",
+      }),
+      "handles-fci": answerToRecord("eng-1", {
+        questionId: "handles-fci",
+        value: "true",
+      }),
+      "core-systems": answerToRecord("eng-1", {
+        questionId: "core-systems",
+        value: "Microsoft 365, Jira",
+      }),
+      "boundary-confidence": answerToRecord("eng-1", {
+        questionId: "boundary-confidence",
+        score: 4,
+      }),
+    };
+
+    const summary = buildBoundarySummary(answers);
+
+    expect(summary.includesCui).toBe(true);
+    expect(summary.includesFci).toBe(true);
+    expect(summary.inScopeSystems).toEqual(["Microsoft 365", "Jira"]);
+    expect(summary.unresolvedScopeQuestions).toContain(
+      "CUI is present, but the storage or processing location is still undefined.",
+    );
+    expect(summary.confidence).toBe(3);
+  });
+});

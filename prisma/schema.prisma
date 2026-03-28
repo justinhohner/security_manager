@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id           String       @id @default(cuid())
+  legalName    String
+  engagements  Engagement[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Engagement {
+  id                 String              @id @default(cuid())
+  companyId          String
+  engagementName     String
+  targetFrameworks   String[]
+  targetCmmcLevel    String?
+  leadAssessor       String?
+  currentStage       String              @default("onboarding")
+  currentSectionId   String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  company            Company             @relation(fields: [companyId], references: [id])
+  boundary           AssessmentBoundary?
+  answers            Answer[]
+  systems            System[]
+  decisions          Decision[]
+}
+
+model AssessmentBoundary {
+  id                String      @id @default(cuid())
+  engagementId      String      @unique
+  summary           String
+  includesCui       Boolean     @default(false)
+  includesFci       Boolean     @default(false)
+  assumptions       String[]
+  exclusions        String[]
+  unresolvedScope   String[]
+  confidence        Int         @default(1)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  engagement        Engagement  @relation(fields: [engagementId], references: [id])
+}
+
+model System {
+  id              String      @id @default(cuid())
+  engagementId    String
+  name            String
+  storesCui       Boolean     @default(false)
+  processesCui    Boolean     @default(false)
+  transmitsCui    Boolean     @default(false)
+  protectsCui     Boolean     @default(false)
+  engagement      Engagement  @relation(fields: [engagementId], references: [id])
+}
+
+model Question {
+  id              String    @id
+  sectionId       String
+  prompt          String
+  responseType    String
+  scaleDefinition String?
+  isFollowUp      Boolean   @default(false)
+  parentQuestionId String?
+}
+
+model Answer {
+  id              String      @id @default(cuid())
+  engagementId    String
+  questionId      String
+  score           Int?
+  value           String?
+  rationale       String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  engagement      Engagement  @relation(fields: [engagementId], references: [id])
+}
+
+model Decision {
+  id             String      @id @default(cuid())
+  engagementId   String
+  title          String
+  rationale      String
+  createdAt      DateTime    @default(now())
+  engagement     Engagement  @relation(fields: [engagementId], references: [id])
+}

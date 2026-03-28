@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run dev
+    working_dir: /workspace
+    environment:
+      DATABASE_URL: postgresql://security_manager:security_manager@db:5432/security_manager
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    volumes:
+      - .:/workspace
+      - app_node_modules:/workspace/node_modules
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: security_manager
+      POSTGRES_USER: security_manager
+      POSTGRES_PASSWORD: security_manager
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  app_node_modules:
+  postgres_data:
