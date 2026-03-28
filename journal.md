@@ -10,3 +10,4 @@
 - Added saved initiative candidates to the program workspace so roadmap preview items can now be promoted into tracked planning records.
 - Added initiative detail pages and simple status transitions so saved initiative candidates can move into planned and in-progress states.
 - Added a dedicated roadmap workspace that groups saved initiatives by status and links into initiative detail from a stable planning list view.
+- Added lightweight owner and target-date planning fields to initiative detail so saved initiatives can start functioning as a consultant work plan.

@@ -10,6 +10,9 @@ import styles from "./initiative-detail-workspace.module.css";
 export function InitiativeDetailWorkspace({ initialState }: { initialState: InitiativeDetailState }) {
   const [state, setState] = useState(initialState);
   const [savingStatus, setSavingStatus] = useState<string | null>(null);
+  const [isSavingPlan, setIsSavingPlan] = useState(false);
+  const [owner, setOwner] = useState(initialState.initiative.owner ?? "");
+  const [targetDate, setTargetDate] = useState(initialState.initiative.targetDate ?? "");
 
   async function handleStatusChange(status: "planned" | "in-progress") {
     setSavingStatus(status);
@@ -28,6 +31,27 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
 
     setState(data.state);
     setSavingStatus(null);
+  }
+
+  async function handlePlanSave() {
+    setIsSavingPlan(true);
+
+    const response = await fetch(
+      `/api/engagements/${state.engagement.id}/initiatives/${state.initiative.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ owner, targetDate }),
+      },
+    );
+    const data = (await response.json()) as { state: InitiativeDetailState };
+
+    setState(data.state);
+    setOwner(data.state.initiative.owner ?? "");
+    setTargetDate(data.state.initiative.targetDate ?? "");
+    setIsSavingPlan(false);
   }
 
   return (
@@ -55,8 +79,43 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
           <strong>Status:</strong> {state.initiative.status}
         </p>
         <p className={styles.copy}>
+          <strong>Owner:</strong> {state.initiative.owner ?? "Not assigned"}
+        </p>
+        <p className={styles.copy}>
+          <strong>Target date:</strong> {state.initiative.targetDate ?? "Not set"}
+        </p>
+        <p className={styles.copy}>
           <strong>Why now:</strong> {state.initiative.whyNow}
         </p>
+      </section>
+
+      <section className={styles.card}>
+        <h2>Planning details</h2>
+        <div className={styles.formGrid}>
+          <label className={styles.field}>
+            <span>Owner</span>
+            <input
+              className={styles.input}
+              onChange={(event) => setOwner(event.currentTarget.value)}
+              placeholder="Assign owner"
+              value={owner}
+            />
+          </label>
+          <label className={styles.field}>
+            <span>Target date</span>
+            <input
+              className={styles.input}
+              onChange={(event) => setTargetDate(event.currentTarget.value)}
+              type="date"
+              value={targetDate}
+            />
+          </label>
+        </div>
+        <div className={styles.actions}>
+          <button className={styles.secondaryButton} disabled={isSavingPlan} onClick={() => void handlePlanSave()} type="button">
+            {isSavingPlan ? "Saving..." : "Save planning details"}
+          </button>
+        </div>
       </section>
 
       <section className={styles.card}>

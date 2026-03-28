@@ -131,12 +131,16 @@ describe("buildInitiativeDetailState", () => {
         priority: "do-now",
         targetCapabilityIds: ["governance-policy"],
         status: "candidate",
+        owner: "Justin",
+        targetDate: "2026-04-15",
         createdAt: "2026-03-28T00:00:00.000Z",
       },
     });
 
     expect(detail.initiative.whyNow).toContain("do now");
     expect(detail.initiative.nextStatusOptions).toEqual(["planned", "in-progress"]);
+    expect(detail.initiative.owner).toBe("Justin");
+    expect(detail.initiative.targetDate).toBe("2026-04-15");
   });
 });
 

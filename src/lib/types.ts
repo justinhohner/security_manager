@@ -226,6 +226,8 @@ export interface Initiative {
   priority: "do-now" | "do-next" | "plan-this-quarter";
   targetCapabilityIds: string[];
   status: "candidate" | "planned" | "in-progress";
+  owner?: string;
+  targetDate?: string;
   createdAt: string;
 }
 

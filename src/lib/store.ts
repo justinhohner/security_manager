@@ -296,6 +296,35 @@ export async function updateInitiativeStatus(
   return getInitiativeDetailState(engagementId, initiativeId);
 }
 
+export async function updateInitiativePlan(
+  engagementId: string,
+  initiativeId: string,
+  input: {
+    owner?: string;
+    targetDate?: string;
+    status?: Initiative["status"];
+  },
+): Promise<InitiativeDetailState | undefined> {
+  const existing = await prisma.initiative.findUnique({
+    where: { id: initiativeId },
+  });
+
+  if (!existing || existing.engagementId !== engagementId) {
+    return undefined;
+  }
+
+  await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: {
+      owner: input.owner?.trim() || null,
+      targetDate: input.targetDate?.trim() || null,
+      status: input.status ?? existing.status,
+    },
+  });
+
+  return getInitiativeDetailState(engagementId, initiativeId);
+}
+
 export async function getRoadmapWorkspaceState(
   engagementId: string,
 ): Promise<RoadmapWorkspaceState | undefined> {
@@ -617,6 +646,8 @@ function mapInitiativeRecord(record: InitiativeRecord): Initiative {
     priority: record.priority as Initiative["priority"],
     targetCapabilityIds: record.targetCapabilityIds,
     status: record.status as Initiative["status"],
+    owner: record.owner ?? undefined,
+    targetDate: record.targetDate ?? undefined,
     createdAt: record.createdAt.toISOString(),
   };
 }
@@ -645,5 +676,7 @@ type InitiativeRecord = {
   priority: string;
   targetCapabilityIds: string[];
   status: string;
+  owner: string | null;
+  targetDate: string | null;
   createdAt: Date;
 };

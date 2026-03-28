@@ -143,6 +143,8 @@ model Initiative {
   priority          String
   targetCapabilityIds String[]
   status            String      @default("candidate")
+  owner             String?
+  targetDate        String?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   engagement        Engagement  @relation(fields: [engagementId], references: [id])
