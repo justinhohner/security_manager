@@ -414,6 +414,9 @@ function QuestionField({
   onSave: (question: Question, answer: Partial<Answer>) => Promise<void>;
   isSaving: boolean;
 }) {
+  const requiresEvidence = question.evidencePolicy !== "none";
+  const hasSavedAnswer = Boolean(answer?.value?.trim()) || typeof answer?.score === "number";
+
   return (
     <div>
       <label className={styles.fieldLabel}>
@@ -476,59 +479,65 @@ function QuestionField({
           ))}
         </div>
       ) : null}
-      <p className={styles.saveState}>{isSaving ? "Saving..." : "Saved through the workflow API."}</p>
+      <p className={styles.saveState}>
+        {isSaving ? "Saving..." : hasSavedAnswer ? "Response saved." : "Response saves when you answer the field."}
+      </p>
 
-      <div className={styles.evidencePanel}>
-        <p className={styles.evidenceHeading}>Evidence references</p>
-        {evidenceReferences.length > 0 ? (
-          <ul className={styles.evidenceList}>
-            {evidenceReferences.map((reference) => (
-              <li key={reference.id}>
-                <strong>{reference.title}</strong>
-                <span>{reference.source}</span>
-                {reference.note ? <small>{reference.note}</small> : null}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className={styles.saveState}>No evidence references linked yet.</p>
-        )}
+      {requiresEvidence ? (
+        <div className={styles.evidencePanel}>
+          <p className={styles.evidenceHeading}>
+            {question.evidencePolicy === "expected" ? "Evidence references expected" : "Evidence references optional"}
+          </p>
+          {evidenceReferences.length > 0 ? (
+            <ul className={styles.evidenceList}>
+              {evidenceReferences.map((reference) => (
+                <li key={reference.id}>
+                  <strong>{reference.title}</strong>
+                  <span>{reference.source}</span>
+                  {reference.note ? <small>{reference.note}</small> : null}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={styles.saveState}>No evidence references linked yet.</p>
+          )}
 
-        <div className={styles.evidenceDraft}>
-          <input
-            className={styles.input}
-            onChange={(event) =>
-              onEvidenceDraftChange({ ...evidenceDraft, title: event.currentTarget.value })
-            }
-            placeholder="Evidence title"
-            value={evidenceDraft.title}
-          />
-          <input
-            className={styles.input}
-            onChange={(event) =>
-              onEvidenceDraftChange({ ...evidenceDraft, source: event.currentTarget.value })
-            }
-            placeholder="Source or location"
-            value={evidenceDraft.source}
-          />
-          <textarea
-            className={styles.textarea}
-            onChange={(event) =>
-              onEvidenceDraftChange({ ...evidenceDraft, note: event.currentTarget.value })
-            }
-            placeholder="Short note"
-            rows={2}
-            value={evidenceDraft.note}
-          />
-          <button
-            className={styles.secondaryButton}
-            onClick={() => void onEvidenceSave(question.id)}
-            type="button"
-          >
-            {isEvidenceSaving ? "Saving evidence..." : "Add evidence reference"}
-          </button>
+          <div className={styles.evidenceDraft}>
+            <input
+              className={styles.input}
+              onChange={(event) =>
+                onEvidenceDraftChange({ ...evidenceDraft, title: event.currentTarget.value })
+              }
+              placeholder="Evidence title"
+              value={evidenceDraft.title}
+            />
+            <input
+              className={styles.input}
+              onChange={(event) =>
+                onEvidenceDraftChange({ ...evidenceDraft, source: event.currentTarget.value })
+              }
+              placeholder="Source or location"
+              value={evidenceDraft.source}
+            />
+            <textarea
+              className={styles.textarea}
+              onChange={(event) =>
+                onEvidenceDraftChange({ ...evidenceDraft, note: event.currentTarget.value })
+              }
+              placeholder="Short note"
+              rows={2}
+              value={evidenceDraft.note}
+            />
+            <button
+              className={styles.secondaryButton}
+              onClick={() => void onEvidenceSave(question.id)}
+              type="button"
+            >
+              {isEvidenceSaving ? "Saving evidence..." : "Add evidence reference"}
+            </button>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

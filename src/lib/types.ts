@@ -1,6 +1,7 @@
 // ABOUTME: Defines shared domain types for the onboarding and boundary workflow.
 // ABOUTME: Keeps UI, API routes, and deterministic rules aligned to one model.
 export type QuestionResponseType = "text" | "textarea" | "boolean" | "scale" | "select";
+export type EvidencePolicy = "none" | "optional" | "expected";
 
 export type SectionId =
   | "engagement-setup"
@@ -36,6 +37,7 @@ export interface Question {
   prompt: string;
   helperText?: string;
   responseType: QuestionResponseType;
+  evidencePolicy: EvidencePolicy;
   options?: QuestionOption[];
   parentQuestionId?: string;
   isFollowUp: boolean;

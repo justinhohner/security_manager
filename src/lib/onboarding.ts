@@ -47,6 +47,7 @@ export const BASELINE_QUESTIONS: Question[] = [
     sectionId: "engagement-setup",
     prompt: "What is the name of this engagement?",
     responseType: "text",
+    evidencePolicy: "none",
     isFollowUp: false,
   },
   {
@@ -54,6 +55,7 @@ export const BASELINE_QUESTIONS: Question[] = [
     sectionId: "engagement-setup",
     prompt: "Who is the lead consultant or assessor?",
     responseType: "text",
+    evidencePolicy: "none",
     isFollowUp: false,
   },
   {
@@ -61,6 +63,7 @@ export const BASELINE_QUESTIONS: Question[] = [
     sectionId: "business-contract-context",
     prompt: "What CMMC level is the client targeting?",
     responseType: "select",
+    evidencePolicy: "none",
     options: [
       { label: "Level 1", value: "Level 1" },
       { label: "Level 2", value: "Level 2" },
@@ -73,6 +76,7 @@ export const BASELINE_QUESTIONS: Question[] = [
     sectionId: "business-contract-context",
     prompt: "Does the client handle FCI in scope for this engagement?",
     responseType: "boolean",
+    evidencePolicy: "optional",
     isFollowUp: false,
   },
   {
@@ -80,6 +84,7 @@ export const BASELINE_QUESTIONS: Question[] = [
     sectionId: "business-contract-context",
     prompt: "Does the client store, process, or transmit CUI?",
     responseType: "boolean",
+    evidencePolicy: "optional",
     isFollowUp: false,
   },
   {
@@ -87,6 +92,7 @@ export const BASELINE_QUESTIONS: Question[] = [
     sectionId: "organization-profile",
     prompt: "Is any IT or security function outsourced?",
     responseType: "boolean",
+    evidencePolicy: "optional",
     isFollowUp: false,
   },
   {
@@ -95,6 +101,7 @@ export const BASELINE_QUESTIONS: Question[] = [
     prompt: "How established is the client's security program today?",
     helperText: SCALE_HELPER,
     responseType: "scale",
+    evidencePolicy: "expected",
     isFollowUp: false,
   },
   {
@@ -102,6 +109,7 @@ export const BASELINE_QUESTIONS: Question[] = [
     sectionId: "environment-overview",
     prompt: "What identity provider is in use?",
     responseType: "text",
+    evidencePolicy: "optional",
     isFollowUp: false,
   },
   {
@@ -110,6 +118,7 @@ export const BASELINE_QUESTIONS: Question[] = [
     prompt: "List the primary business or technical systems in scope.",
     helperText: "Separate system names with commas.",
     responseType: "textarea",
+    evidencePolicy: "optional",
     isFollowUp: false,
   },
   {
@@ -118,6 +127,7 @@ export const BASELINE_QUESTIONS: Question[] = [
     prompt: "How confident is the team in the current assessment boundary?",
     helperText: SCALE_HELPER,
     responseType: "scale",
+    evidencePolicy: "expected",
     isFollowUp: false,
   },
   {
@@ -126,6 +136,7 @@ export const BASELINE_QUESTIONS: Question[] = [
     prompt: "What exclusions are currently assumed to be out of scope?",
     helperText: "Leave blank if there are no exclusions yet.",
     responseType: "textarea",
+    evidencePolicy: "optional",
     isFollowUp: false,
   },
 ];
@@ -137,6 +148,7 @@ const FOLLOW_UP_QUESTIONS: Question[] = [
     prompt: "Where is CUI stored, processed, or transmitted today?",
     helperText: "Name the systems or environments involved.",
     responseType: "textarea",
+    evidencePolicy: "expected",
     parentQuestionId: "handles-cui",
     isFollowUp: true,
   },
@@ -145,6 +157,7 @@ const FOLLOW_UP_QUESTIONS: Question[] = [
     sectionId: "organization-profile",
     prompt: "Which provider owns the outsourced IT or security work?",
     responseType: "text",
+    evidencePolicy: "optional",
     parentQuestionId: "outsourced-it",
     isFollowUp: true,
   },
@@ -153,6 +166,7 @@ const FOLLOW_UP_QUESTIONS: Question[] = [
     sectionId: "organization-profile",
     prompt: "What evidence supports the stated security program maturity?",
     responseType: "textarea",
+    evidencePolicy: "expected",
     parentQuestionId: "security-program-maturity",
     isFollowUp: true,
   },
@@ -161,6 +175,7 @@ const FOLLOW_UP_QUESTIONS: Question[] = [
     sectionId: "boundary-baseline",
     prompt: "Why is the team confident in the current boundary?",
     responseType: "textarea",
+    evidencePolicy: "expected",
     parentQuestionId: "boundary-confidence",
     isFollowUp: true,
   },
@@ -169,6 +184,7 @@ const FOLLOW_UP_QUESTIONS: Question[] = [
     sectionId: "boundary-baseline",
     prompt: "Why are those exclusions considered out of scope?",
     responseType: "textarea",
+    evidencePolicy: "expected",
     parentQuestionId: "boundary-exclusions",
     isFollowUp: true,
   },

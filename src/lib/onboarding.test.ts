@@ -1,7 +1,7 @@
 // ABOUTME: Tests deterministic onboarding follow-up and boundary summary rules.
 // ABOUTME: Protects the core slice logic from silent behavior drift.
 import { describe, expect, it } from "vitest";
-import { answerToRecord, buildBoundarySummary, buildFollowUpQuestions, buildSystemSnapshots } from "@/lib/onboarding";
+import { answerToRecord, buildBoundarySummary, buildFollowUpQuestions, buildSystemSnapshots, getQuestionById } from "@/lib/onboarding";
 import { buildManualSystems, mapEvidenceReferences, resolveBoundarySummary } from "@/lib/persistence";
 import type { Answer } from "@/lib/types";
 
@@ -27,6 +27,19 @@ describe("buildFollowUpQuestions", () => {
     expect(followUps["handles-cui"][0]?.id).toBe("cui-storage-location");
     expect(followUps["outsourced-it"][0]?.id).toBe("outsourced-it-provider");
     expect(followUps["security-program-maturity"][0]?.id).toBe("security-program-evidence");
+  });
+});
+
+describe("getQuestionById", () => {
+  it("does not require evidence for administrative questions", () => {
+    expect(getQuestionById("lead-assessor")?.evidencePolicy).toBe("none");
+    expect(getQuestionById("engagement-name")?.evidencePolicy).toBe("none");
+  });
+
+  it("expects evidence only for questions that support assessment trust", () => {
+    expect(getQuestionById("security-program-maturity")?.evidencePolicy).toBe("expected");
+    expect(getQuestionById("boundary-confidence")?.evidencePolicy).toBe("expected");
+    expect(getQuestionById("handles-cui")?.evidencePolicy).toBe("optional");
   });
 });
 
