@@ -2,7 +2,7 @@
 // ABOUTME: Keeps capability and roadmap preview logic aligned to the new product direction.
 import { describe, expect, it } from "vitest";
 import { answerToRecord, buildBoundarySummary } from "@/lib/onboarding";
-import { buildCapabilityDetailState, buildProgramBaselineState } from "@/lib/program";
+import { buildCapabilityDetailState, buildInitiativeInput, buildProgramBaselineState } from "@/lib/program";
 
 const engagement = {
   id: "eng-1",
@@ -49,6 +49,7 @@ describe("buildProgramBaselineState", () => {
       answers,
       evidenceByQuestionId: {},
       boundaryPreview: buildBoundarySummary(answers),
+      initiatives: [],
     });
 
     expect(state.capabilities).toHaveLength(5);
@@ -88,10 +89,31 @@ describe("buildCapabilityDetailState", () => {
       answers,
       evidenceByQuestionId: {},
       boundaryPreview: buildBoundarySummary(answers),
+      initiatives: [],
     });
 
     expect(detail?.capability.name).toBe("Governance and policy");
     expect(detail?.capability.nextActions[0]).toBe("Establish a more repeatable governance and policy baseline.");
     expect(detail?.capability.linkedInitiativeIds).toContain("initiative-governance-baseline");
+  });
+});
+
+describe("buildInitiativeInput", () => {
+  it("creates a saved initiative payload from a roadmap preview item", () => {
+    const initiative = buildInitiativeInput({
+      id: "initiative-governance-baseline",
+      title: "Stabilize governance and policy baseline",
+      priority: "do-now",
+      rationale: "Program maturity is low, so the consultant needs a stronger governance baseline before larger improvements will stick.",
+      targetCapabilityIds: ["governance-policy"],
+    });
+
+    expect(initiative).toMatchObject({
+      title: "Stabilize governance and policy baseline",
+      summary: "Program maturity is low, so the consultant needs a stronger governance baseline before larger improvements will stick.",
+      priority: "do-now",
+      targetCapabilityIds: ["governance-policy"],
+      status: "candidate",
+    });
   });
 });

@@ -6,6 +6,7 @@ import type {
   CapabilityDetailState,
   Engagement,
   EvidenceReference,
+  InitiativePreview,
   ProgramBaselineState,
 } from "@/lib/types";
 
@@ -14,6 +15,7 @@ export function buildProgramBaselineState(input: {
   answers: Record<string, Answer>;
   evidenceByQuestionId: Record<string, EvidenceReference[]>;
   boundaryPreview: BoundarySummary;
+  initiatives: ProgramBaselineState["initiatives"];
 }): ProgramBaselineState {
   const capabilities = [
     buildGovernanceCapability(input.answers),
@@ -35,6 +37,7 @@ export function buildProgramBaselineState(input: {
     },
     capabilities,
     roadmapPreview: buildRoadmapPreview(capabilities, input.answers),
+    initiatives: input.initiatives,
   };
 }
 
@@ -44,6 +47,7 @@ export function buildCapabilityDetailState(input: {
   answers: Record<string, Answer>;
   evidenceByQuestionId: Record<string, EvidenceReference[]>;
   boundaryPreview: BoundarySummary;
+  initiatives: ProgramBaselineState["initiatives"];
 }): CapabilityDetailState | undefined {
   const baseline = buildProgramBaselineState(input);
   const capability = baseline.capabilities.find((item) => item.id === input.capabilityId);
@@ -65,6 +69,16 @@ export function buildCapabilityDetailState(input: {
       nextActions: [capability.topGap, ...linkedInitiatives.map((initiative) => initiative.title)],
       linkedInitiativeIds: linkedInitiatives.map((initiative) => initiative.id),
     },
+  };
+}
+
+export function buildInitiativeInput(preview: InitiativePreview) {
+  return {
+    title: preview.title,
+    summary: preview.rationale,
+    priority: preview.priority,
+    targetCapabilityIds: preview.targetCapabilityIds,
+    status: "candidate",
   };
 }
 

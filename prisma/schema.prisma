@@ -34,6 +34,7 @@ model Engagement {
   systems            System[]
   decisions          Decision[]
   findings           Finding[]
+  initiatives        Initiative[]
 }
 
 model AssessmentBoundary {
@@ -132,4 +133,17 @@ model Finding {
   engagement     Engagement  @relation(fields: [engagementId], references: [id])
 
   @@index([engagementId, requirementId])
+}
+
+model Initiative {
+  id                String      @id @default(cuid())
+  engagementId      String
+  title             String
+  summary           String
+  priority          String
+  targetCapabilityIds String[]
+  status            String      @default("candidate")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  engagement        Engagement  @relation(fields: [engagementId], references: [id])
 }

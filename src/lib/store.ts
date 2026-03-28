@@ -1,11 +1,11 @@
 // ABOUTME: Persists engagement workflow state through Prisma for the first slice.
 // ABOUTME: Keeps onboarding, boundary state, assessment detail, and findings aligned.
 import { buildAssessmentState, buildFindingInput, buildRequirementDetailState } from "@/lib/assessment";
-import { buildCapabilityDetailState, buildProgramBaselineState } from "@/lib/program";
+import { buildCapabilityDetailState, buildInitiativeInput, buildProgramBaselineState } from "@/lib/program";
 import { prisma } from "@/lib/prisma";
 import { BASELINE_QUESTIONS, SECTION_ORDER, buildBoundarySummary, buildFollowUpQuestions, buildSectionStatuses } from "@/lib/onboarding";
 import { buildManualSystems, mapAnswers, mapEvidenceReferences, resolveBoundarySummary, synchronizeBoundary } from "@/lib/persistence";
-import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type CapabilityDetailState, type Engagement, type EvidenceReferenceInput, type Finding, type OnboardingState, type ProgramBaselineState, type RequirementDetailState, type SectionId } from "@/lib/types";
+import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type CapabilityDetailState, type Engagement, type EvidenceReferenceInput, type Finding, type Initiative, type OnboardingState, type ProgramBaselineState, type RequirementDetailState, type SectionId } from "@/lib/types";
 
 export async function listEngagements(): Promise<Engagement[]> {
   const engagements = await prisma.engagement.findMany({
@@ -176,11 +176,19 @@ export async function getProgramBaselineState(
     return undefined;
   }
 
+  const initiatives = await prisma.initiative.findMany({
+    where: { engagementId },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   return buildProgramBaselineState({
     engagement: state.engagement,
     answers: state.answers,
     evidenceByQuestionId: state.evidenceReferences,
     boundaryPreview: state.boundaryPreview,
+    initiatives: initiatives.map(mapInitiativeRecord),
   });
 }
 
@@ -194,13 +202,53 @@ export async function getCapabilityDetailState(
     return undefined;
   }
 
+  const initiatives = await prisma.initiative.findMany({
+    where: { engagementId },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   return buildCapabilityDetailState({
     engagement: state.engagement,
     capabilityId,
     answers: state.answers,
     evidenceByQuestionId: state.evidenceReferences,
     boundaryPreview: state.boundaryPreview,
+    initiatives: initiatives.map(mapInitiativeRecord),
   });
+}
+
+export async function createInitiativeCandidate(
+  engagementId: string,
+  previewId: string,
+): Promise<ProgramBaselineState | undefined> {
+  const state = await getProgramBaselineState(engagementId);
+
+  if (!state) {
+    return undefined;
+  }
+
+  const preview = state.roadmapPreview.find((item) => item.id === previewId);
+
+  if (!preview) {
+    return undefined;
+  }
+
+  const input = buildInitiativeInput(preview);
+
+  await prisma.initiative.create({
+    data: {
+      engagementId,
+      title: input.title,
+      summary: input.summary,
+      priority: input.priority,
+      targetCapabilityIds: input.targetCapabilityIds,
+      status: input.status,
+    },
+  });
+
+  return getProgramBaselineState(engagementId);
 }
 
 export async function updateBoundary(
@@ -493,6 +541,19 @@ function mapFindingRecord(record: FindingRecord): Finding {
   };
 }
 
+function mapInitiativeRecord(record: InitiativeRecord): Initiative {
+  return {
+    id: record.id,
+    engagementId: record.engagementId,
+    title: record.title,
+    summary: record.summary,
+    priority: record.priority as Initiative["priority"],
+    targetCapabilityIds: record.targetCapabilityIds,
+    status: record.status,
+    createdAt: record.createdAt.toISOString(),
+  };
+}
+
 type FindingRecord = {
   id: string;
   engagementId: string;
@@ -505,6 +566,17 @@ type FindingRecord = {
   missingSupport: string[];
   confidence: string;
   priorityRationale: string;
+  status: string;
+  createdAt: Date;
+};
+
+type InitiativeRecord = {
+  id: string;
+  engagementId: string;
+  title: string;
+  summary: string;
+  priority: string;
+  targetCapabilityIds: string[];
   status: string;
   createdAt: Date;
 };

@@ -218,6 +218,17 @@ export interface InitiativePreview {
   targetCapabilityIds: string[];
 }
 
+export interface Initiative {
+  id: string;
+  engagementId: string;
+  title: string;
+  summary: string;
+  priority: "do-now" | "do-next" | "plan-this-quarter";
+  targetCapabilityIds: string[];
+  status: string;
+  createdAt: string;
+}
+
 export interface ProgramBaselineState {
   engagement: Engagement;
   summary: {
@@ -228,6 +239,7 @@ export interface ProgramBaselineState {
   };
   capabilities: CapabilitySummary[];
   roadmapPreview: InitiativePreview[];
+  initiatives: Initiative[];
 }
 
 export interface CapabilityDetailState {
