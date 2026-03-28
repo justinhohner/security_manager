@@ -302,6 +302,8 @@ export async function updateInitiativePlan(
   input: {
     owner?: string;
     targetDate?: string;
+    notes?: string;
+    blockers?: string;
     status?: Initiative["status"];
   },
 ): Promise<InitiativeDetailState | undefined> {
@@ -318,6 +320,8 @@ export async function updateInitiativePlan(
     data: {
       owner: input.owner?.trim() || null,
       targetDate: input.targetDate?.trim() || null,
+      notes: input.notes?.trim() || null,
+      blockers: input.blockers?.trim() || null,
       status: input.status ?? existing.status,
     },
   });
@@ -648,6 +652,8 @@ function mapInitiativeRecord(record: InitiativeRecord): Initiative {
     status: record.status as Initiative["status"],
     owner: record.owner ?? undefined,
     targetDate: record.targetDate ?? undefined,
+    notes: record.notes ?? undefined,
+    blockers: record.blockers ?? undefined,
     createdAt: record.createdAt.toISOString(),
   };
 }
@@ -678,5 +684,7 @@ type InitiativeRecord = {
   status: string;
   owner: string | null;
   targetDate: string | null;
+  notes: string | null;
+  blockers: string | null;
   createdAt: Date;
 };

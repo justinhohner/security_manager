@@ -12,3 +12,4 @@
 - Added a dedicated roadmap workspace that groups saved initiatives by status and links into initiative detail from a stable planning list view.
 - Added lightweight owner and target-date planning fields to initiative detail so saved initiatives can start functioning as a consultant work plan.
 - Sorted roadmap initiatives into a deterministic action-plan order and surfaced owner and target date directly in the roadmap list so consultants can scan the work plan without drilling into each record.
+- Added lightweight initiative notes and blockers to the detail workflow so roadmap items can carry execution context without becoming a full task management system.

@@ -28,6 +28,8 @@ export async function PATCH(
     status?: Initiative["status"];
     owner?: string;
     targetDate?: string;
+    notes?: string;
+    blockers?: string;
   };
   const state =
     body.status && Object.keys(body).length === 1

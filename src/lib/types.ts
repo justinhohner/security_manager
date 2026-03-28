@@ -228,6 +228,8 @@ export interface Initiative {
   status: "candidate" | "planned" | "in-progress";
   owner?: string;
   targetDate?: string;
+  notes?: string;
+  blockers?: string;
   createdAt: string;
 }
 

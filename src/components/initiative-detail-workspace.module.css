@@ -67,6 +67,16 @@
   background: white;
 }
 
+.textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: white;
+  font: inherit;
+  resize: vertical;
+}
+
 .kicker {
   margin: 0 0 10px;
   color: var(--muted);

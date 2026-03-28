@@ -13,6 +13,8 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
   const [isSavingPlan, setIsSavingPlan] = useState(false);
   const [owner, setOwner] = useState(initialState.initiative.owner ?? "");
   const [targetDate, setTargetDate] = useState(initialState.initiative.targetDate ?? "");
+  const [notes, setNotes] = useState(initialState.initiative.notes ?? "");
+  const [blockers, setBlockers] = useState(initialState.initiative.blockers ?? "");
 
   async function handleStatusChange(status: "planned" | "in-progress") {
     setSavingStatus(status);
@@ -43,7 +45,7 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ owner, targetDate }),
+        body: JSON.stringify({ owner, targetDate, notes, blockers }),
       },
     );
     const data = (await response.json()) as { state: InitiativeDetailState };
@@ -51,6 +53,8 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
     setState(data.state);
     setOwner(data.state.initiative.owner ?? "");
     setTargetDate(data.state.initiative.targetDate ?? "");
+    setNotes(data.state.initiative.notes ?? "");
+    setBlockers(data.state.initiative.blockers ?? "");
     setIsSavingPlan(false);
   }
 
@@ -85,6 +89,12 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
           <strong>Target date:</strong> {state.initiative.targetDate ?? "Not set"}
         </p>
         <p className={styles.copy}>
+          <strong>Notes:</strong> {state.initiative.notes ?? "No notes recorded"}
+        </p>
+        <p className={styles.copy}>
+          <strong>Blockers:</strong> {state.initiative.blockers ?? "No blockers recorded"}
+        </p>
+        <p className={styles.copy}>
           <strong>Why now:</strong> {state.initiative.whyNow}
         </p>
       </section>
@@ -108,6 +118,26 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
               onChange={(event) => setTargetDate(event.currentTarget.value)}
               type="date"
               value={targetDate}
+            />
+          </label>
+          <label className={styles.field}>
+            <span>Notes</span>
+            <textarea
+              className={styles.textarea}
+              onChange={(event) => setNotes(event.currentTarget.value)}
+              placeholder="Capture plan notes, assumptions, or follow-up context"
+              rows={4}
+              value={notes}
+            />
+          </label>
+          <label className={styles.field}>
+            <span>Blockers</span>
+            <textarea
+              className={styles.textarea}
+              onChange={(event) => setBlockers(event.currentTarget.value)}
+              placeholder="Capture current blockers or dependencies"
+              rows={4}
+              value={blockers}
             />
           </label>
         </div>

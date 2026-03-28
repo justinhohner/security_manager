@@ -133,6 +133,8 @@ describe("buildInitiativeDetailState", () => {
         status: "candidate",
         owner: "Justin",
         targetDate: "2026-04-15",
+        notes: "Confirm scope with the client lead before kickoff.",
+        blockers: "Waiting on the latest system inventory export.",
         createdAt: "2026-03-28T00:00:00.000Z",
       },
     });
@@ -141,6 +143,8 @@ describe("buildInitiativeDetailState", () => {
     expect(detail.initiative.nextStatusOptions).toEqual(["planned", "in-progress"]);
     expect(detail.initiative.owner).toBe("Justin");
     expect(detail.initiative.targetDate).toBe("2026-04-15");
+    expect(detail.initiative.notes).toBe("Confirm scope with the client lead before kickoff.");
+    expect(detail.initiative.blockers).toBe("Waiting on the latest system inventory export.");
   });
 });
 
