@@ -34,6 +34,9 @@ The product should support a staged workflow:
 ## Documentation Map
 
 - [Product Reset](./docs/product-reset.md)
+- [Program-First Domain Model](./docs/program-domain-model.md)
+- [Capability Baseline Onboarding](./docs/capability-baseline-onboarding.md)
+- [Initiative And Roadmap Model](./docs/initiative-roadmap-model.md)
 - [Project Architecture](./docs/architecture.md)
 - [Onboarding Flow](./docs/onboarding-flow.md)
 - [Domain Model](./docs/domain-model.md)
