@@ -174,6 +174,8 @@ const FOLLOW_UP_QUESTIONS: Question[] = [
   },
 ];
 
+const ALL_QUESTIONS = [...BASELINE_QUESTIONS, ...FOLLOW_UP_QUESTIONS];
+
 export function buildFollowUpQuestions(answerMap: Record<string, Answer>): Record<string, Question[]> {
   const followUps: Record<string, Question[]> = {};
 
@@ -280,6 +282,10 @@ export function answerToRecord(engagementId: string, input: AnswerInput): Answer
     value: input.value,
     rationale: input.rationale,
   };
+}
+
+export function getQuestionById(questionId: string) {
+  return ALL_QUESTIONS.find((question) => question.id === questionId);
 }
 
 export function buildSystemSnapshots(answerMap: Record<string, Answer>) {

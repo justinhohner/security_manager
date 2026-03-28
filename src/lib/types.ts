@@ -117,6 +117,25 @@ export interface RequirementAssessment {
   rationale: string;
 }
 
+export interface RequirementQuestionDetail {
+  questionId: string;
+  prompt: string;
+  answered: boolean;
+  answerValue?: string;
+  answerScore?: number;
+  evidenceReferences: EvidenceReference[];
+}
+
+export interface RequirementDetail extends RequirementAssessment {
+  questionDetails: RequirementQuestionDetail[];
+  nextAction: string;
+  findingCandidate: {
+    title: string;
+    statement: string;
+    impact: string;
+  };
+}
+
 export interface AssessmentState {
   engagement: Engagement;
   requirements: RequirementAssessment[];
@@ -125,6 +144,11 @@ export interface AssessmentState {
     partial: number;
     supported: number;
   };
+}
+
+export interface RequirementDetailState {
+  engagement: Engagement;
+  requirement: RequirementDetail;
 }
 
 export interface OnboardingState {

@@ -1,10 +1,10 @@
 // ABOUTME: Persists engagement workflow state through Prisma for the first slice.
 // ABOUTME: Keeps onboarding, boundary state, and seeded sample data aligned.
-import { buildAssessmentState } from "@/lib/assessment";
+import { buildAssessmentState, buildRequirementDetailState } from "@/lib/assessment";
 import { prisma } from "@/lib/prisma";
 import { BASELINE_QUESTIONS, SECTION_ORDER, buildBoundarySummary, buildFollowUpQuestions, buildSectionStatuses } from "@/lib/onboarding";
 import { buildManualSystems, mapAnswers, mapEvidenceReferences, resolveBoundarySummary, synchronizeBoundary } from "@/lib/persistence";
-import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type Engagement, type EvidenceReferenceInput, type OnboardingState, type SectionId } from "@/lib/types";
+import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type Engagement, type EvidenceReferenceInput, type OnboardingState, type RequirementDetailState, type SectionId } from "@/lib/types";
 
 export async function listEngagements(): Promise<Engagement[]> {
   const engagements = await prisma.engagement.findMany({
@@ -313,6 +313,39 @@ export async function getAssessmentState(engagementId: string): Promise<Assessme
   return buildAssessmentState({
     engagement: mapEngagementRecord(engagement),
     answerIds: engagement.answers.map((answer) => answer.questionId),
+    evidenceByQuestionId: mapEvidenceReferences(engagement.evidenceReferences),
+  });
+}
+
+export async function getRequirementDetailState(
+  engagementId: string,
+  requirementId: string,
+): Promise<RequirementDetailState | undefined> {
+  const engagement = await prisma.engagement.findUnique({
+    where: { id: engagementId },
+    include: {
+      company: true,
+      answers: true,
+      evidenceReferences: {
+        include: {
+          answer: {
+            select: {
+              questionId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!engagement) {
+    return undefined;
+  }
+
+  return buildRequirementDetailState({
+    engagement: mapEngagementRecord(engagement),
+    requirementId,
+    answers: mapAnswers(engagement.answers),
     evidenceByQuestionId: mapEvidenceReferences(engagement.evidenceReferences),
   });
 }

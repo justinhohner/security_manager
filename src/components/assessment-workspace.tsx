@@ -78,6 +78,14 @@ export function AssessmentWorkspace({ assessment }: { assessment: AssessmentStat
                 <p>{requirement.evidenceCount} linked references</p>
               </div>
             </div>
+            <div className={styles.cardActions}>
+              <Link
+                className={styles.secondaryButton}
+                href={`/engagements/${assessment.engagement.id}/assessment/${requirement.id}`}
+              >
+                Open requirement detail
+              </Link>
+            </div>
           </article>
         ))}
       </section>

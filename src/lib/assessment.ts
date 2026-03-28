@@ -1,6 +1,15 @@
 // ABOUTME: Defines starter requirement mappings derived from onboarding answers and evidence.
-// ABOUTME: Produces a lightweight assessment view without overstating control compliance.
-import type { AssessmentState, Engagement, RequirementAssessment, RequirementAssessmentStatus } from "@/lib/types";
+// ABOUTME: Produces lightweight assessment and requirement-detail views without overstating compliance.
+import { BASELINE_QUESTIONS, getQuestionById } from "@/lib/onboarding";
+import type {
+  Answer,
+  AssessmentState,
+  Engagement,
+  EvidenceReference,
+  RequirementAssessment,
+  RequirementAssessmentStatus,
+  RequirementDetailState,
+} from "@/lib/types";
 
 type RequirementDefinition = {
   id: string;
@@ -71,6 +80,48 @@ export function buildAssessmentState(input: {
   };
 }
 
+export function buildRequirementDetailState(input: {
+  engagement: Engagement;
+  requirementId: string;
+  answers: Record<string, Answer>;
+  evidenceByQuestionId: Record<string, EvidenceReference[]>;
+}): RequirementDetailState | undefined {
+  const definition = STARTER_REQUIREMENTS.find((requirement) => requirement.id === input.requirementId);
+
+  if (!definition) {
+    return undefined;
+  }
+
+  const requirement = buildRequirementAssessment(
+    definition,
+    Object.keys(input.answers),
+    input.evidenceByQuestionId,
+  );
+  const questionDetails = definition.mappedQuestionIds.map((questionId) => {
+    const question = getQuestionById(questionId) ?? BASELINE_QUESTIONS.find((item) => item.id === questionId);
+    const answer = input.answers[questionId];
+
+    return {
+      questionId,
+      prompt: question?.prompt ?? questionId,
+      answered: Boolean(answer),
+      answerValue: answer?.value,
+      answerScore: answer?.score,
+      evidenceReferences: input.evidenceByQuestionId[questionId] ?? [],
+    };
+  });
+
+  return {
+    engagement: input.engagement,
+    requirement: {
+      ...requirement,
+      questionDetails,
+      nextAction: buildNextAction(requirement),
+      findingCandidate: buildFindingCandidate(requirement),
+    },
+  };
+}
+
 function buildRequirementAssessment(
   requirement: RequirementDefinition,
   answerIds: string[],
@@ -131,4 +182,43 @@ function buildRationale(
   }
 
   return `${answeredCount}/${mappedCount} mapped prompts are answered with ${evidenceCount} evidence references attached so far.`;
+}
+
+function buildNextAction(requirement: RequirementAssessment) {
+  if (requirement.status === "supported") {
+    return "Review the current support set for consistency and decide whether a requirement-level assessment note is ready.";
+  }
+
+  if (requirement.status === "partial") {
+    return "Close missing prompts and attach at least one evidence reference before treating this requirement area as supportable.";
+  }
+
+  return "Start by answering the mapped prompts in onboarding before evaluating this requirement area.";
+}
+
+function buildFindingCandidate(requirement: RequirementAssessment) {
+  if (requirement.status === "supported") {
+    return {
+      title: "Potentially supportable requirement area",
+      statement:
+        "This mapped requirement area has complete prompt coverage and at least one evidence reference, but still needs assessor review before a formal finding is recorded.",
+      impact: "Low immediate concern, but assessor validation is still required.",
+    };
+  }
+
+  if (requirement.status === "partial") {
+    return {
+      title: "Potential evidence or coverage gap",
+      statement:
+        "This mapped requirement area has some onboarding support, but the current prompt coverage or evidence set is incomplete.",
+      impact: "Moderate concern because incomplete support may delay requirement review or create a future finding.",
+    };
+  }
+
+  return {
+    title: "Potential unmapped or unsupported requirement area",
+    statement:
+      "This mapped requirement area does not yet have onboarding support and is likely to require more discovery before assessment work can proceed.",
+    impact: "High uncertainty because the requirement area has not been supported with onboarding data.",
+  };
 }

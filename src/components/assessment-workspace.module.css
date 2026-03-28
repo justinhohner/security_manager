@@ -143,6 +143,10 @@
   gap: 16px;
 }
 
+.cardActions {
+  margin-top: 18px;
+}
+
 .grid ul {
   padding-left: 18px;
 }
