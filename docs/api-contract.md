@@ -2,16 +2,16 @@
 
 ## Purpose
 
-This document defines a first-pass API shape for the v1 application.
+This document defines a first-pass API shape for the program-first version of the v1 application.
 
-It is intended to keep the frontend and backend aligned around stable domain objects and workflow endpoints.
+It is intended to keep the frontend and backend aligned around stable program resources and workflow endpoints.
 
 ## API Principles
 
-1. Resource shapes should follow the canonical domain model.
+1. Resource shapes should follow the program-first domain model.
 2. Workflow endpoints are allowed when they simplify frontend development.
-3. The frontend should not need to infer critical workflow state from scattered resources.
-4. Findings and exports should remain traceable to source answers and evidence.
+3. The frontend should not need to infer important workflow state from scattered resources.
+4. Framework mapping should remain an overlay on top of the program model.
 
 ## Resource Families
 
@@ -19,13 +19,16 @@ The first API surface should cover:
 
 - companies
 - engagements
-- boundaries
-- systems
+- security-programs
+- capability-reviews
+- system-profiles
 - questions
 - answers
 - evidence
-- findings
-- remediation-items
+- initiative-candidates
+- initiatives
+- maintenance-tasks
+- framework-overlays
 - exports
 
 ## Suggested Endpoint Groups
@@ -43,43 +46,41 @@ The first API surface should cover:
 - `GET /engagements/:engagement_id`
 - `PATCH /engagements/:engagement_id`
 
-### Onboarding Workflow
+### Program Baseline Workflow
 
-- `GET /engagements/:engagement_id/onboarding`
-- `GET /engagements/:engagement_id/onboarding/sections`
-- `PATCH /engagements/:engagement_id/onboarding/sections/:section_id`
-- `POST /engagements/:engagement_id/onboarding/answers`
-- `PATCH /engagements/:engagement_id/onboarding/answers/:answer_id`
-- `GET /engagements/:engagement_id/onboarding/follow-ups`
+- `GET /engagements/:engagement_id/program-baseline`
+- `GET /engagements/:engagement_id/program-baseline/sections`
+- `PATCH /engagements/:engagement_id/program-baseline/sections/:section_id`
+- `POST /engagements/:engagement_id/program-baseline/answers`
+- `PATCH /engagements/:engagement_id/program-baseline/answers/:answer_id`
+- `GET /engagements/:engagement_id/program-baseline/follow-ups`
 
-### Boundary Workflow
+### Capability Review Workflow
 
-- `GET /engagements/:engagement_id/boundary`
-- `PATCH /engagements/:engagement_id/boundary`
-- `POST /engagements/:engagement_id/systems`
-- `PATCH /engagements/:engagement_id/systems/:system_id`
-- `POST /engagements/:engagement_id/decisions`
-
-### Assessment Workflow
-
-- `GET /engagements/:engagement_id/assessment`
-- `GET /engagements/:engagement_id/requirements`
-- `GET /engagements/:engagement_id/requirements/:requirement_id`
+- `GET /engagements/:engagement_id/capabilities`
+- `GET /engagements/:engagement_id/capabilities/:capability_review_id`
+- `PATCH /engagements/:engagement_id/capabilities/:capability_review_id`
 - `POST /engagements/:engagement_id/evidence`
 - `PATCH /engagements/:engagement_id/evidence/:evidence_id`
 
-### Findings Workflow
+### Roadmap Workflow
 
-- `GET /engagements/:engagement_id/findings`
-- `POST /engagements/:engagement_id/findings`
-- `GET /engagements/:engagement_id/findings/:finding_id`
-- `PATCH /engagements/:engagement_id/findings/:finding_id`
+- `GET /engagements/:engagement_id/roadmap-preview`
+- `GET /engagements/:engagement_id/initiatives`
+- `POST /engagements/:engagement_id/initiatives`
+- `PATCH /engagements/:engagement_id/initiatives/:initiative_id`
 
-### Remediation Workflow
+### Maintenance Workflow
 
-- `GET /engagements/:engagement_id/remediation-items`
-- `POST /engagements/:engagement_id/remediation-items`
-- `PATCH /engagements/:engagement_id/remediation-items/:remediation_item_id`
+- `GET /engagements/:engagement_id/maintenance-tasks`
+- `POST /engagements/:engagement_id/maintenance-tasks`
+- `PATCH /engagements/:engagement_id/maintenance-tasks/:maintenance_task_id`
+
+### Framework Overlay Workflow
+
+- `GET /engagements/:engagement_id/framework-overlays`
+- `GET /engagements/:engagement_id/framework-overlays/:framework_overlay_id`
+- `POST /engagements/:engagement_id/framework-overlays`
 
 ### Exports
 
@@ -91,95 +92,125 @@ The first API surface should cover:
 
 The workflow endpoints should return frontend-ready summaries instead of forcing many round trips.
 
-### Example: Get Onboarding Workspace
+### Example: Get Program Baseline Workspace
 
-`GET /engagements/:engagement_id/onboarding`
+`GET /engagements/:engagement_id/program-baseline`
 
 Response shape:
 
 - engagement summary
+- program summary
 - section list with status
 - current section
 - baseline questions
 - inline follow-up questions
 - answer state
 - completion summary
-- unresolved blockers
+- low-confidence areas
 
-### Example: Get Findings Workspace
+### Example: Get Capability Workspace
 
-`GET /engagements/:engagement_id/findings`
+`GET /engagements/:engagement_id/capabilities`
 
 Response shape:
 
-- findings list
-- counts by status
-- counts by priority
-- unresolved evidence gaps
-- prioritization inputs summary
+- capability list
+- counts by maturity band
+- counts by confidence band
+- weakest capabilities
+- strongest capabilities
+- evidence readiness summary
+
+### Example: Get Roadmap Workspace
+
+`GET /engagements/:engagement_id/roadmap-preview`
+
+Response shape:
+
+- initiative candidate list
+- counts by priority horizon
+- immediate next actions
+- confidence caveats
+- rationale summary
 
 ## Object Expectations
 
-### Answer Object
+### Capability Review Object
 
-Should support both structured and evaluative responses:
+Should support both evaluative scoring and practical operating notes:
 
-- answer_id
-- question_id
-- related_object_type
-- related_object_id
-- score
-- value
-- rationale
-- created_at
-- updated_at
+- capability_review_id
+- capability_id
+- maturity_score
+- confidence_score
+- operating_summary
+- strengths
+- weaknesses
+- evidence_readiness
+- resilience_impact
+- status
 
-### Finding Object
+### Initiative Object
 
-Must expose the minimum trust schema directly:
+Must expose the rationale for why the work matters:
 
-- finding_id
-- requirement_id
+- initiative_id
 - title
-- statement
-- observed_condition
-- evidence_used
-- evidence_missing
-- confidence
-- impact
-- recommended_remediation
+- summary
+- target_capabilities
+- related_risks
+- expected_outcomes
+- suggested_first_steps
+- evidence_expectations
+- effort_estimate
+- cost_estimate
+- resilience_value
+- priority
 - priority_rationale
 - status
 
-### Remediation Item Object
+### Maintenance Task Object
 
-Should preserve prioritization and execution context:
+Should preserve recurring validation context:
 
-- remediation_item_id
-- finding_id
-- action_summary
+- maintenance_task_id
+- title
+- linked_capability
+- cadence
+- trigger_condition
 - owner
-- cost_estimate
-- effort_estimate
-- target_date
-- validation_plan
+- evidence_expectation
 - status
+
+### Framework Overlay Object
+
+Should keep framework views secondary to the program model:
+
+- framework_overlay_id
+- framework_name
+- framework_version
+- scope_notes
+- mapped_capabilities
+- supported_requirement_areas
+- unsupported_requirement_areas
+- export_readiness
 
 ## Contract Decisions Still Open
 
-- whether workflow endpoints should embed full resource objects or summaries plus references
-- whether finding creation is fully manual, fully generated, or hybrid in v1
+- whether capability reviews should be generated dynamically or persisted immediately in v1
+- whether initiative generation is fully automatic, fully manual, or hybrid in v1
 - how evidence file storage should be represented in the API
-- how export generation status should be tracked
+- how maintenance task cadence and triggers should be stored
+- how much framework overlay detail belongs in the initial API
 
 ## Recommended Implementation Strategy
 
-Build the API in thin vertical slices that match the main screens:
+Build the API in thin vertical slices that match the main program screens:
 
 1. engagement list and overview
-2. onboarding workspace
-3. boundary workspace
-4. findings workspace
-5. remediation workspace
+2. program baseline workspace
+3. capability workspace
+4. roadmap preview and initiative workspace
+5. maintenance workspace
 
-This reduces the chance that the backend drifts away from the UI or vice versa.
+This reduces the chance that the backend drifts away from the UI or that framework overlays take over the core design too early.

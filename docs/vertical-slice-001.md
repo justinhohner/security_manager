@@ -2,29 +2,30 @@
 
 ## Purpose
 
-This document defines the first implementation slice for the application.
+This document defines the first implementation slice for the program-first version of the application.
 
-The slice is intentionally narrow and should prove that the frontend workflow, backend data model, and workflow endpoints can stay aligned.
+The slice should prove that onboarding, capability baseline, and roadmap preview can move through one aligned frontend and backend flow.
 
 ## Slice Goal
 
 Allow a consultant to:
 
 1. create an engagement
-2. complete the first onboarding sections
+2. complete the first program-baseline onboarding sections
 3. answer inline follow-up questions
-4. generate an initial boundary summary
+4. generate an initial capability baseline and roadmap preview
 
-This is the smallest useful flow because it produces a concrete work product instead of a partial form with no downstream value.
+This is the smallest useful flow because it produces a program view and recommended improvement direction rather than only a partial assessment artifact.
 
 ## User Outcome
 
 By the end of the slice, the consultant should be able to leave the session with:
 
 - a saved engagement
-- a saved onboarding baseline
+- a saved company and operating baseline
 - visible follow-up logic
-- a first-pass boundary summary that can be reviewed and refined later
+- a first-pass capability summary
+- a short roadmap preview with recommended next actions
 
 ## Included Screens
 
@@ -42,18 +43,19 @@ Required capabilities:
 
 - show engagement metadata
 - show onboarding progress
-- link into onboarding
-- show boundary summary state
+- show capability baseline summary
+- show roadmap preview summary
+- link into the program workspace
 
-### 3. Onboarding Workspace
+### 3. Program Baseline Workspace
 
 Required sections in this slice:
 
-1. engagement setup
-2. business and contract context
-3. organization profile
-4. environment overview
-5. boundary baseline
+1. engagement context
+2. business context
+3. operating model
+4. technology and dependency profile
+5. security capability baseline
 
 Required capabilities:
 
@@ -63,25 +65,36 @@ Required capabilities:
 - save follow-up answers
 - show section completion state
 
-### 4. Boundary Summary View
+### 4. Capability Summary View
 
 Required capabilities:
 
-- show initial in-scope systems
-- show stated CUI and FCI assumptions
-- show unresolved scope gaps
-- show boundary confidence
+- show capability scores
+- show confidence signals
+- show weakest and strongest areas
+- show low-confidence areas that need more validation
 
-This can be a lightweight read-first view in the first slice rather than a full editing workspace.
+This can be a lightweight read-first panel in the first slice rather than a full detailed workspace.
+
+### 5. Roadmap Preview View
+
+Required capabilities:
+
+- show initial initiative candidates
+- show short priority rationale
+- show immediate next actions
+
+This can be a lightweight preview rather than a full initiative management workspace.
 
 ## Excluded From This Slice
 
-- findings generation
-- remediation workflow
+- detailed framework assessment views
+- requirement-level findings workflow
+- full remediation tracking
 - evidence file upload
-- requirement-level assessment views
 - exports
 - scans
+- recurring maintenance scheduling
 
 ## Required Backend Objects
 
@@ -89,13 +102,14 @@ The slice needs only these persisted objects:
 
 - company
 - engagement
+- security program
 - question
 - answer
-- assessment boundary
-- system
+- capability review
+- initiative candidate
 - decision
 
-Evidence objects can be stubbed out later. Do not force them into the first slice unless needed for the UI to function.
+Evidence objects can remain lightweight references for now. Do not force full evidence management into the first slice.
 
 ## Required Endpoint Set
 
@@ -105,34 +119,40 @@ Evidence objects can be stubbed out later. Do not force them into the first slic
 - `GET /engagements`
 - `GET /engagements/:engagement_id`
 
-### Onboarding
+### Program Baseline
 
-- `GET /engagements/:engagement_id/onboarding`
-- `PATCH /engagements/:engagement_id/onboarding/sections/:section_id`
-- `POST /engagements/:engagement_id/onboarding/answers`
-- `PATCH /engagements/:engagement_id/onboarding/answers/:answer_id`
+- `GET /engagements/:engagement_id/program-baseline`
+- `GET /engagements/:engagement_id/program-baseline/sections`
+- `PATCH /engagements/:engagement_id/program-baseline/sections/:section_id`
+- `POST /engagements/:engagement_id/program-baseline/answers`
 
-### Boundary
+### Capability Review
 
-- `GET /engagements/:engagement_id/boundary`
+- `GET /engagements/:engagement_id/capabilities`
 
-## Suggested Section Payload Shape
+### Roadmap Preview
 
-`GET /engagements/:engagement_id/onboarding`
+- `GET /engagements/:engagement_id/roadmap-preview`
+
+## Suggested Program Baseline Payload Shape
+
+`GET /engagements/:engagement_id/program-baseline`
 
 Should return:
 
 - engagement summary
+- program summary
 - sections
 - current section
 - baseline questions
 - inline follow-up questions grouped by triggering answer
 - answer values
-- section completion state
+- completion summary
+- low-confidence areas
 
 ## Suggested Answer Payload Shape
 
-`POST /engagements/:engagement_id/onboarding/answers`
+`POST /engagements/:engagement_id/program-baseline/answers`
 
 Request:
 
@@ -148,23 +168,33 @@ Response:
 - saved answer
 - triggered follow-up questions
 - updated section completion state
-- updated boundary summary preview if affected
+- updated capability summary preview if affected
+- updated roadmap preview if affected
 
-That last point matters. If the answer changes scope, the frontend should not have to make blind guesses about whether the boundary preview changed.
+That last point matters. If the answer changes capability posture, the frontend should not guess whether the downstream summaries changed.
 
-## Suggested Boundary Payload Shape
+## Suggested Capability Summary Payload Shape
 
-`GET /engagements/:engagement_id/boundary`
+`GET /engagements/:engagement_id/capabilities`
 
 Should return:
 
-- boundary summary
-- in-scope systems
-- protected systems
-- exclusions
-- assumptions
-- unresolved scope questions
-- confidence
+- capability summary list
+- strongest capabilities
+- weakest capabilities
+- low-confidence capabilities
+- evidence readiness summary
+
+## Suggested Roadmap Preview Payload Shape
+
+`GET /engagements/:engagement_id/roadmap-preview`
+
+Should return:
+
+- initiative candidate list
+- immediate next actions
+- priority rationale summary
+- confidence caveats
 
 ## Follow-Up Logic Expectations
 
@@ -172,16 +202,17 @@ The first slice should prove inline follow-up behavior with a limited rule set.
 
 Good first triggers:
 
-- CUI present without identified storage or processing location
-- outsourced IT present without named provider or responsibility detail
-- high maturity score without supporting explanation
-- stated boundary exclusion without rationale
+- a high maturity score with low confidence
+- outsourced support is present but ownership is vague
+- backups are claimed but restore validation is unclear
+- incident response is claimed but exercises are missing
+- logging exists but alert ownership is undefined
 
 Do not try to build generalized agentic follow-up logic in the first slice. Use a small deterministic rule set first.
 
 ## Frontend Implementation Notes
 
-The frontend should treat onboarding as a workflow screen, not a collection of unrelated forms.
+The frontend should treat onboarding as a program workflow, not as an assessment checklist.
 
 Recommended state needs:
 
@@ -191,7 +222,8 @@ Recommended state needs:
 - answers by question id
 - inline follow-ups by parent answer id
 - section completion summary
-- boundary preview summary
+- capability preview summary
+- roadmap preview summary
 
 ## Backend Implementation Notes
 
@@ -201,7 +233,8 @@ Recommended first behaviors:
 
 - seeded onboarding question set for the included sections
 - deterministic follow-up generation rules
-- simple boundary summary derivation from onboarding answers
+- simple capability summary derivation from onboarding answers
+- simple initiative candidate generation from weak or low-confidence capability areas
 - optimistic updates only where the response payload confirms the new state
 
 ## Acceptance Criteria
@@ -212,15 +245,16 @@ The slice is complete when:
 - the included onboarding sections can be completed and revisited
 - inline follow-up questions appear immediately when triggered
 - answers persist correctly
-- a boundary summary is derived from the saved answers
+- a capability baseline summary is derived from the saved answers
+- a roadmap preview is derived from the saved answers
 - the same saved state can be reloaded without loss or frontend-only reconstruction
 
 ## Next Slice After This
 
 The next logical slice would add:
 
-- editable boundary workspace
-- evidence references
-- requirement mapping starter view
+- capability detail workspace
+- initiative detail and prioritization inputs
+- evidence references tied to capability reviews
 
-That would keep the system moving from onboarding into actual assessment work.
+That would keep the system moving from onboarding into practical program planning rather than into assessment-first detail work.

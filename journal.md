@@ -4,3 +4,4 @@
 - The intended product is a security program manager that uses frameworks as inputs, overlays, and reporting lenses.
 - Current assessment-first work still has value, but it should become secondary to a program-first model centered on capability baseline, roadmap, and maintenance.
 - Added three replacement planning docs for the new center of gravity: program-first domain model, capability baseline onboarding, and initiative/roadmap model.
+- Replaced the old implementation-facing planning direction with program-first versions of the screen map, API contract, and first vertical slice.

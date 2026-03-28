@@ -2,24 +2,24 @@
 
 ## Purpose
 
-This document defines the initial application surfaces for v1.
+This document defines the initial application surfaces for the program-first version of v1.
 
-The goal is to keep frontend design anchored to the workflows already chosen for onboarding, assessment, findings, and remediation.
+The goal is to keep frontend design anchored to workflows for onboarding, capability baseline, roadmap generation, and ongoing program maintenance.
 
 ## Application Shape
 
-The product should begin as a single application with role-based views for consultants and assessors.
+The product should begin as a single application with role-based views for consultants and internal reviewers.
 
-The primary navigation should favor workflow progression over generic reporting.
+The primary navigation should favor program workflow progression over framework-centric reporting.
 
 Suggested top-level navigation:
 
 - engagements
-- onboarding
-- boundary
-- assessment
-- findings
-- remediation
+- program baseline
+- capabilities
+- roadmap
+- maintenance
+- framework overlays
 - exports
 
 ## 1. Engagement List
@@ -34,10 +34,10 @@ Primary information:
 
 - company name
 - engagement name
-- target frameworks
+- engagement goal
 - current stage
 - last updated
-- open high-priority findings count
+- top priority indicator
 
 Primary actions:
 
@@ -51,42 +51,43 @@ Purpose:
 
 - provide the operating summary for a single engagement
 - show where the team is in the workflow
-- surface blockers and confidence gaps
+- surface capability gaps and priority direction
 
 Primary panels:
 
 - company and engagement summary
-- framework targets
+- business and operating context
 - onboarding completion
-- boundary confidence
+- capability baseline summary
+- roadmap preview
 - evidence readiness
-- findings summary
 - next recommended actions
 
-## 3. Onboarding Workspace
+## 3. Program Baseline Workspace
 
 Purpose:
 
 - complete the section-based onboarding flow
 - capture structured answers
 - generate and answer inline follow-up questions
+- build the current-state program baseline
 
 Primary layout:
 
 - left navigation for sections
 - center pane for questions and answers
-- right context pane for notes, evidence references, and follow-up rationale
+- right context pane for capability summary, evidence cues, and follow-up rationale
 
 Primary section order:
 
-1. engagement setup
-2. business and contract context
-3. organization profile
-4. environment overview
-5. boundary baseline
-6. security program baseline
-7. evidence readiness
-8. initial review
+1. engagement context
+2. business context
+3. operating model
+4. technology and dependency profile
+5. security capability baseline
+6. evidence and validation readiness
+7. framework and obligation overlay
+8. initial program review
 
 Primary interaction rules:
 
@@ -96,113 +97,106 @@ Primary interaction rules:
 - evaluative fields use the 1 to 5 scale
 - freeform notes stay minimal and contextual
 
-## 4. Boundary Workspace
+## 4. Capability Workspace
 
 Purpose:
 
-- review and refine the initial assessment boundary
-- make scope assumptions visible
-- connect systems and dependencies to the boundary
+- inspect one capability in more detail
+- understand maturity, confidence, evidence, and operational weaknesses
+- prepare improvement planning
 
 Primary panels:
 
-- boundary summary
-- in-scope systems
-- protected systems
-- third-party dependencies
-- exclusions and assumptions
-- confidence and unresolved scope questions
+- capability summary
+- maturity and confidence
+- strengths and weaknesses
+- linked systems or dependencies
+- evidence readiness
+- framework overlay hints
 
 Primary actions:
 
-- add or edit system
-- mark CUI handling path
-- record scope assumption
-- flag unresolved scope question
+- review current posture
+- add supporting evidence references
+- flag low-confidence assumptions
+- mark candidate initiatives
 
-## 5. Assessment Workspace
-
-Purpose:
-
-- connect requirements, objectives, answers, and evidence
-- track assessment completeness
-- prepare the basis for findings
-
-Primary panels:
-
-- framework families and requirements
-- requirement detail
-- mapped questions and answers
-- evidence references
-- assessment objective coverage
-- missing information and confidence gaps
-
-Primary actions:
-
-- review requirement coverage
-- attach evidence
-- request follow-up
-- mark ready for finding generation
-
-## 6. Findings Workspace
+## 5. Roadmap Workspace
 
 Purpose:
 
-- inspect, validate, and prioritize findings
-- preserve trust by exposing reasoning and evidence
+- review, validate, and prioritize initiative candidates
+- turn current-state understanding into practical improvement work
 
 Primary list fields:
 
 - priority
-- requirement affected
-- finding title
-- confidence
-- impact
+- initiative title
+- target capabilities
+- resilience value
+- effort band
 - status
 
-Finding detail must show:
+Initiative detail should show:
 
-- requirement affected
-- finding statement
-- why the finding exists
-- evidence used
-- evidence missing
-- confidence
-- impact
-- recommended remediation
+- summary
+- targeted capabilities
+- related risks
+- expected outcomes
+- suggested first steps
+- evidence or validation expectations
 - priority rationale
+- framework relevance if any
 
 Primary actions:
 
-- accept or revise finding
+- accept or revise initiative
 - adjust priority inputs
-- create remediation item
-- mark for more evidence
+- promote to tracked work
+- defer or regroup initiative
 
-## 7. Remediation Workspace
+## 6. Maintenance Workspace
 
 Purpose:
 
-- transform validated findings into tracked remediation work
+- track recurring or triggered work needed to keep the program healthy
 
 Primary list fields:
 
-- remediation item
-- linked finding
+- maintenance task
+- cadence or trigger
 - owner
-- effort
-- cost
-- target date
+- linked capability
+- validation expectation
 - status
 
 Primary detail panels:
 
-- action summary
-- expected benefit
-- cost and effort
-- validation plan
-- dependencies
-- reassessment trigger
+- task summary
+- why it matters
+- required evidence
+- trigger conditions
+- recent completion history
+
+## 7. Framework Overlay Workspace
+
+Purpose:
+
+- view the security program through a framework lens without making the framework the main workflow
+
+Primary panels:
+
+- selected framework summary
+- mapped capabilities
+- supported and unsupported requirement areas
+- evidence gaps
+- export readiness
+
+Primary actions:
+
+- review framework alignment
+- identify overlay gaps
+- generate framework-facing export
 
 ## 8. Exports
 
@@ -213,13 +207,14 @@ Purpose:
 Likely export types:
 
 - engagement summary
-- boundary summary
-- findings register
-- remediation plan
-- POA&M style export
+- capability baseline summary
+- roadmap summary
+- maintenance summary
+- framework overlay report
 
 ## Design Notes
 
-- the application should keep list-and-detail workflows consistent across boundary, findings, and remediation
-- every major workspace should show completion, confidence, and unresolved items
-- the UI should optimize for reviewable structured information rather than conversational interaction
+- the application should keep list-and-detail workflows consistent across capabilities, roadmap, and maintenance
+- every major workspace should show confidence, unresolved items, and recommended next actions
+- the UI should optimize for structured consulting work rather than conversational interaction
+- framework-centric views should feel like overlays on top of the main program workspace
