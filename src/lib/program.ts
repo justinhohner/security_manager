@@ -102,14 +102,22 @@ export function buildInitiativeDetailState(input: {
 export function buildRoadmapWorkspaceState(input: {
   engagement: Engagement;
   initiatives: Initiative[];
+  now?: string;
 }): RoadmapWorkspaceState {
-  const initiatives = [...input.initiatives].sort(byRoadmapOrder);
+  const referenceTime = input.now ? new Date(input.now) : new Date();
+  const initiatives = [...input.initiatives]
+    .map((initiative) => ({
+      ...initiative,
+      isStale: isStaleInitiative(initiative, referenceTime),
+    }))
+    .sort(byRoadmapOrder);
   const counts = {
     candidate: initiatives.filter((initiative) => initiative.status === "candidate").length,
     planned: initiatives.filter((initiative) => initiative.status === "planned").length,
     inProgress: initiatives.filter((initiative) => initiative.status === "in-progress").length,
     completed: initiatives.filter((initiative) => initiative.status === "completed").length,
     blocked: initiatives.filter((initiative) => initiative.blockers?.trim()).length,
+    stale: initiatives.filter((initiative) => initiative.isStale).length,
   };
 
   return {
@@ -329,6 +337,10 @@ function buildRoadmapFocus(counts: RoadmapWorkspaceState["counts"]) {
     return `${counts.blocked} initiative${counts.blocked === 1 ? "" : "s"} currently blocked and need unblock decisions.`;
   }
 
+  if (counts.stale > 0) {
+    return `${counts.stale} initiative${counts.stale === 1 ? "" : "s"} look stale and need follow-up.`;
+  }
+
   if (counts.candidate > 0) {
     return `${counts.candidate} candidate initiatives still need planning review.`;
   }
@@ -471,4 +483,15 @@ function statusRank(status: Initiative["status"]) {
   };
 
   return ranks[status];
+}
+
+function isStaleInitiative(initiative: Initiative, referenceTime: Date) {
+  if (initiative.status === "completed") {
+    return false;
+  }
+
+  const lastChangedAt = initiative.statusChangedAt ? new Date(initiative.statusChangedAt) : new Date(initiative.createdAt);
+  const ageInDays = (referenceTime.getTime() - lastChangedAt.getTime()) / (1000 * 60 * 60 * 24);
+
+  return ageInDays >= 14;
 }

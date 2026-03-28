@@ -42,6 +42,9 @@ export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
           <p className={styles.copy}>
             <strong>Blocked:</strong> {state.counts.blocked}
           </p>
+          <p className={styles.copy}>
+            <strong>Stale:</strong> {state.counts.stale}
+          </p>
         </article>
       </section>
 
@@ -61,6 +64,7 @@ export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
               <p className={styles.copy}>
                 <strong>Last status change:</strong> {formatTimestamp(initiative.statusChangedAt)}
               </p>
+              {initiative.isStale ? <p className={styles.stale}>Needs follow-up: status has not changed recently.</p> : null}
               <p className={styles.copy}>
                 <strong>Owner:</strong> {initiative.owner?.trim() ? initiative.owner : "Unassigned"}
               </p>

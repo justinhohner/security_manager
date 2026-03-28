@@ -232,6 +232,7 @@ export interface Initiative {
   blockers?: string;
   outcome?: string;
   statusChangedAt?: string;
+  isStale?: boolean;
   createdAt: string;
 }
 
@@ -270,6 +271,7 @@ export interface RoadmapWorkspaceState {
     inProgress: number;
     completed: number;
     blocked: number;
+    stale: number;
   };
   nextFocus: string;
 }

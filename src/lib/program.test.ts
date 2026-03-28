@@ -222,6 +222,7 @@ describe("buildRoadmapWorkspaceState", () => {
       inProgress: 0,
       completed: 0,
       blocked: 0,
+      stale: 0,
     });
     expect(state.nextFocus).toContain("1 candidate");
   });
@@ -307,5 +308,42 @@ describe("buildRoadmapWorkspaceState", () => {
     expect(state.counts.blocked).toBe(1);
     expect(state.nextFocus).toContain("1 initiative");
     expect(state.nextFocus).toContain("blocked");
+  });
+
+  it("flags stale active work in the roadmap summary", () => {
+    const state = buildRoadmapWorkspaceState({
+      engagement,
+      now: "2026-04-30T12:00:00.000Z",
+      initiatives: [
+        {
+          id: "initiative-1",
+          engagementId: "eng-1",
+          title: "Identity validation",
+          summary: "Summary",
+          priority: "do-now",
+          targetCapabilityIds: ["identity-access"],
+          status: "planned",
+          statusChangedAt: "2026-04-01T12:00:00.000Z",
+          createdAt: "2026-03-28T00:00:00.000Z",
+        },
+        {
+          id: "initiative-2",
+          engagementId: "eng-1",
+          title: "Completed cleanup",
+          summary: "Summary",
+          priority: "do-next",
+          targetCapabilityIds: ["asset-configuration"],
+          status: "completed",
+          statusChangedAt: "2026-04-01T12:00:00.000Z",
+          createdAt: "2026-03-28T01:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(state.counts.stale).toBe(1);
+    expect(state.nextFocus).toContain("1 initiative");
+    expect(state.nextFocus).toContain("stale");
+    expect(state.initiatives[0]?.isStale).toBe(true);
+    expect(state.initiatives[1]?.isStale).toBe(false);
   });
 });
