@@ -108,6 +108,7 @@ export function buildRoadmapWorkspaceState(input: {
     candidate: initiatives.filter((initiative) => initiative.status === "candidate").length,
     planned: initiatives.filter((initiative) => initiative.status === "planned").length,
     inProgress: initiatives.filter((initiative) => initiative.status === "in-progress").length,
+    completed: initiatives.filter((initiative) => initiative.status === "completed").length,
     blocked: initiatives.filter((initiative) => initiative.blockers?.trim()).length,
   };
 
@@ -307,13 +308,17 @@ function buildWhyItMatters(capabilityId: string) {
   return messages[capabilityId] ?? "This capability influences the health of the overall security program.";
 }
 
-function buildNextStatusOptions(status: Initiative["status"]): Array<"planned" | "in-progress"> {
+function buildNextStatusOptions(status: Initiative["status"]): Array<"planned" | "in-progress" | "completed"> {
   if (status === "candidate") {
     return ["planned", "in-progress"];
   }
 
   if (status === "planned") {
     return ["in-progress"];
+  }
+
+  if (status === "in-progress") {
+    return ["completed"];
   }
 
   return [];
@@ -334,6 +339,10 @@ function buildRoadmapFocus(counts: RoadmapWorkspaceState["counts"]) {
 
   if (counts.inProgress > 0) {
     return `${counts.inProgress} initiatives are currently in progress and need follow-through.`;
+  }
+
+  if (counts.completed > 0) {
+    return `${counts.completed} initiatives are completed and ready for outcome review.`;
   }
 
   return "No saved initiatives exist yet.";
@@ -458,6 +467,7 @@ function statusRank(status: Initiative["status"]) {
     candidate: 0,
     planned: 1,
     "in-progress": 2,
+    completed: 3,
   };
 
   return ranks[status];

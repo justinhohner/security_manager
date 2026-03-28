@@ -146,6 +146,24 @@ describe("buildInitiativeDetailState", () => {
     expect(detail.initiative.notes).toBe("Confirm scope with the client lead before kickoff.");
     expect(detail.initiative.blockers).toBe("Waiting on the latest system inventory export.");
   });
+
+  it("allows in-progress initiatives to move to completed", () => {
+    const detail = buildInitiativeDetailState({
+      engagement,
+      initiative: {
+        id: "initiative-2",
+        engagementId: "eng-1",
+        title: "Close out identity validation",
+        summary: "Summary",
+        priority: "do-next",
+        targetCapabilityIds: ["identity-access"],
+        status: "in-progress",
+        createdAt: "2026-03-28T00:00:00.000Z",
+      },
+    });
+
+    expect(detail.initiative.nextStatusOptions).toEqual(["completed"]);
+  });
 });
 
 describe("buildRoadmapWorkspaceState", () => {
@@ -180,6 +198,7 @@ describe("buildRoadmapWorkspaceState", () => {
       candidate: 1,
       planned: 1,
       inProgress: 0,
+      completed: 0,
       blocked: 0,
     });
     expect(state.nextFocus).toContain("1 candidate");

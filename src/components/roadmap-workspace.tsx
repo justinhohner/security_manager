@@ -37,6 +37,9 @@ export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
             <strong>In progress:</strong> {state.counts.inProgress}
           </p>
           <p className={styles.copy}>
+            <strong>Completed:</strong> {state.counts.completed}
+          </p>
+          <p className={styles.copy}>
             <strong>Blocked:</strong> {state.counts.blocked}
           </p>
         </article>

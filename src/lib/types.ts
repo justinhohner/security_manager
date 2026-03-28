@@ -225,7 +225,7 @@ export interface Initiative {
   summary: string;
   priority: "do-now" | "do-next" | "plan-this-quarter";
   targetCapabilityIds: string[];
-  status: "candidate" | "planned" | "in-progress";
+  status: "candidate" | "planned" | "in-progress" | "completed";
   owner?: string;
   targetDate?: string;
   notes?: string;
@@ -255,7 +255,7 @@ export interface InitiativeDetailState {
   engagement: Engagement;
   initiative: Initiative & {
     whyNow: string;
-    nextStatusOptions: Array<"planned" | "in-progress">;
+    nextStatusOptions: Array<"planned" | "in-progress" | "completed">;
   };
 }
 
@@ -266,6 +266,7 @@ export interface RoadmapWorkspaceState {
     candidate: number;
     planned: number;
     inProgress: number;
+    completed: number;
     blocked: number;
   };
   nextFocus: string;

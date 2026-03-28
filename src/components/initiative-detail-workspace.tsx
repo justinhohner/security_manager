@@ -16,7 +16,7 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
   const [notes, setNotes] = useState(initialState.initiative.notes ?? "");
   const [blockers, setBlockers] = useState(initialState.initiative.blockers ?? "");
 
-  async function handleStatusChange(status: "planned" | "in-progress") {
+  async function handleStatusChange(status: "planned" | "in-progress" | "completed") {
     setSavingStatus(status);
 
     const response = await fetch(
