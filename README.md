@@ -34,6 +34,8 @@ The product should support a staged workflow:
 ## Documentation Map
 
 - [Project Architecture](./docs/architecture.md)
+- [Onboarding Flow](./docs/onboarding-flow.md)
+- [Domain Model](./docs/domain-model.md)
 - [Architecture Decision Records](./docs/adr/README.md)
 - [ADR 0002: Onboarding Interaction Model](./docs/adr/0002-onboarding-interaction-model.md)
 - [Initial GitHub Issue Draft](./docs/github-issue-bootstrap.md)
