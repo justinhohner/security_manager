@@ -56,6 +56,12 @@ export function ProgramWorkspace({ state }: { state: ProgramBaselineState }) {
                 <p className={styles.copy}>
                   <strong>Top gap:</strong> {capability.topGap}
                 </p>
+                <Link
+                  className={styles.detailLink}
+                  href={`/engagements/${state.engagement.id}/program/${capability.id}`}
+                >
+                  Open capability detail
+                </Link>
               </div>
             ))}
           </div>

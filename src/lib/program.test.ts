@@ -2,7 +2,7 @@
 // ABOUTME: Keeps capability and roadmap preview logic aligned to the new product direction.
 import { describe, expect, it } from "vitest";
 import { answerToRecord, buildBoundarySummary } from "@/lib/onboarding";
-import { buildProgramBaselineState } from "@/lib/program";
+import { buildCapabilityDetailState, buildProgramBaselineState } from "@/lib/program";
 
 const engagement = {
   id: "eng-1",
@@ -58,5 +58,40 @@ describe("buildProgramBaselineState", () => {
       title: "Stabilize governance and policy baseline",
     });
     expect(state.roadmapPreview.some((item) => item.title.includes("Clarify outsourced support"))).toBe(true);
+  });
+});
+
+describe("buildCapabilityDetailState", () => {
+  it("builds a capability detail view from the derived program baseline", () => {
+    const answers = {
+      "handles-cui": answerToRecord("eng-1", {
+        questionId: "handles-cui",
+        value: "true",
+      }),
+      "outsourced-it": answerToRecord("eng-1", {
+        questionId: "outsourced-it",
+        value: "true",
+      }),
+      "security-program-maturity": answerToRecord("eng-1", {
+        questionId: "security-program-maturity",
+        score: 2,
+      }),
+      "boundary-confidence": answerToRecord("eng-1", {
+        questionId: "boundary-confidence",
+        score: 2,
+      }),
+    };
+
+    const detail = buildCapabilityDetailState({
+      engagement,
+      capabilityId: "governance-policy",
+      answers,
+      evidenceByQuestionId: {},
+      boundaryPreview: buildBoundarySummary(answers),
+    });
+
+    expect(detail?.capability.name).toBe("Governance and policy");
+    expect(detail?.capability.nextActions[0]).toBe("Establish a more repeatable governance and policy baseline.");
+    expect(detail?.capability.linkedInitiativeIds).toContain("initiative-governance-baseline");
   });
 });

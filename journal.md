@@ -6,3 +6,4 @@
 - Added three replacement planning docs for the new center of gravity: program-first domain model, capability baseline onboarding, and initiative/roadmap model.
 - Replaced the old implementation-facing planning direction with program-first versions of the screen map, API contract, and first vertical slice.
 - Created issue #8 for the program-first workspace scaffold and added a parallel `/program` route with derived capability baseline and roadmap preview.
+- Added read-only capability detail pages under the program workspace so capability cards now drill into rationale, evidence signals, and linked next actions.

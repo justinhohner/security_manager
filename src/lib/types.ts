@@ -203,6 +203,13 @@ export interface CapabilitySummary {
   topGap: string;
 }
 
+export interface CapabilityDetail extends CapabilitySummary {
+  whyItMatters: string;
+  evidenceSignals: string[];
+  nextActions: string[];
+  linkedInitiativeIds: string[];
+}
+
 export interface InitiativePreview {
   id: string;
   title: string;
@@ -221,4 +228,9 @@ export interface ProgramBaselineState {
   };
   capabilities: CapabilitySummary[];
   roadmapPreview: InitiativePreview[];
+}
+
+export interface CapabilityDetailState {
+  engagement: Engagement;
+  capability: CapabilityDetail;
 }

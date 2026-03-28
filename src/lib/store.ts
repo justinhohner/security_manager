@@ -1,11 +1,11 @@
 // ABOUTME: Persists engagement workflow state through Prisma for the first slice.
 // ABOUTME: Keeps onboarding, boundary state, assessment detail, and findings aligned.
 import { buildAssessmentState, buildFindingInput, buildRequirementDetailState } from "@/lib/assessment";
-import { buildProgramBaselineState } from "@/lib/program";
+import { buildCapabilityDetailState, buildProgramBaselineState } from "@/lib/program";
 import { prisma } from "@/lib/prisma";
 import { BASELINE_QUESTIONS, SECTION_ORDER, buildBoundarySummary, buildFollowUpQuestions, buildSectionStatuses } from "@/lib/onboarding";
 import { buildManualSystems, mapAnswers, mapEvidenceReferences, resolveBoundarySummary, synchronizeBoundary } from "@/lib/persistence";
-import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type Engagement, type EvidenceReferenceInput, type Finding, type OnboardingState, type ProgramBaselineState, type RequirementDetailState, type SectionId } from "@/lib/types";
+import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type CapabilityDetailState, type Engagement, type EvidenceReferenceInput, type Finding, type OnboardingState, type ProgramBaselineState, type RequirementDetailState, type SectionId } from "@/lib/types";
 
 export async function listEngagements(): Promise<Engagement[]> {
   const engagements = await prisma.engagement.findMany({
@@ -178,6 +178,25 @@ export async function getProgramBaselineState(
 
   return buildProgramBaselineState({
     engagement: state.engagement,
+    answers: state.answers,
+    evidenceByQuestionId: state.evidenceReferences,
+    boundaryPreview: state.boundaryPreview,
+  });
+}
+
+export async function getCapabilityDetailState(
+  engagementId: string,
+  capabilityId: string,
+): Promise<CapabilityDetailState | undefined> {
+  const state = await getOnboardingState(engagementId);
+
+  if (!state) {
+    return undefined;
+  }
+
+  return buildCapabilityDetailState({
+    engagement: state.engagement,
+    capabilityId,
     answers: state.answers,
     evidenceByQuestionId: state.evidenceReferences,
     boundaryPreview: state.boundaryPreview,

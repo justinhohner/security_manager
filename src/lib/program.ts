@@ -1,6 +1,13 @@
 // ABOUTME: Derives a program-first baseline from the saved onboarding state.
-// ABOUTME: Produces capability summaries and a roadmap preview without replacing persisted workflow data.
-import type { Answer, BoundarySummary, Engagement, EvidenceReference, ProgramBaselineState } from "@/lib/types";
+// ABOUTME: Produces capability summaries, detail views, and a roadmap preview without replacing persisted workflow data.
+import type {
+  Answer,
+  BoundarySummary,
+  CapabilityDetailState,
+  Engagement,
+  EvidenceReference,
+  ProgramBaselineState,
+} from "@/lib/types";
 
 export function buildProgramBaselineState(input: {
   engagement: Engagement;
@@ -28,6 +35,36 @@ export function buildProgramBaselineState(input: {
     },
     capabilities,
     roadmapPreview: buildRoadmapPreview(capabilities, input.answers),
+  };
+}
+
+export function buildCapabilityDetailState(input: {
+  engagement: Engagement;
+  capabilityId: string;
+  answers: Record<string, Answer>;
+  evidenceByQuestionId: Record<string, EvidenceReference[]>;
+  boundaryPreview: BoundarySummary;
+}): CapabilityDetailState | undefined {
+  const baseline = buildProgramBaselineState(input);
+  const capability = baseline.capabilities.find((item) => item.id === input.capabilityId);
+
+  if (!capability) {
+    return undefined;
+  }
+
+  const linkedInitiatives = baseline.roadmapPreview.filter((initiative) =>
+    initiative.targetCapabilityIds.includes(capability.id),
+  );
+
+  return {
+    engagement: input.engagement,
+    capability: {
+      ...capability,
+      whyItMatters: buildWhyItMatters(capability.id),
+      evidenceSignals: buildEvidenceSignals(capability.id, input.answers, input.boundaryPreview),
+      nextActions: [capability.topGap, ...linkedInitiatives.map((initiative) => initiative.title)],
+      linkedInitiativeIds: linkedInitiatives.map((initiative) => initiative.id),
+    },
   };
 }
 
@@ -200,6 +237,65 @@ function buildRoadmapPreview(
   }
 
   return initiatives.slice(0, 4);
+}
+
+function buildWhyItMatters(capabilityId: string) {
+  const messages: Record<string, string> = {
+    "governance-policy":
+      "This capability shapes whether the security program is repeatable enough to sustain improvements over time.",
+    "identity-access":
+      "This capability affects who can reach critical systems and whether access risk can be contained quickly.",
+    "asset-configuration":
+      "This capability determines whether the consultant can trust the inventory and ownership picture that later work depends on.",
+    "vendor-third-party":
+      "This capability matters because third-party responsibilities can hide major operating and security gaps if they are unclear.",
+    "boundary-data-handling":
+      "This capability matters because weak scope clarity will distort prioritization and framework reporting later in the engagement.",
+  };
+
+  return messages[capabilityId] ?? "This capability influences the health of the overall security program.";
+}
+
+function buildEvidenceSignals(
+  capabilityId: string,
+  answers: Record<string, Answer>,
+  boundaryPreview: BoundarySummary,
+) {
+  const signals: Record<string, string[]> = {
+    "governance-policy": [
+      answers["security-program-maturity"]?.score
+        ? `Security program maturity is currently scored ${answers["security-program-maturity"].score}/5.`
+        : "Security program maturity has not been scored yet.",
+    ],
+    "identity-access": [
+      answers["identity-provider"]?.value
+        ? `Identity provider recorded: ${answers["identity-provider"].value}.`
+        : "No identity provider is recorded yet.",
+    ],
+    "asset-configuration": [
+      answers["core-systems"]?.value
+        ? `Named systems: ${answers["core-systems"].value}.`
+        : "No core systems are recorded yet.",
+    ],
+    "vendor-third-party": [
+      answers["outsourced-it"]?.value === "true"
+        ? "Outsourced support is present in the operating model."
+        : "No outsourced IT dependency is currently recorded.",
+      answers["outsourced-it-provider"]?.value
+        ? `Provider named: ${answers["outsourced-it-provider"].value}.`
+        : "No outsourced support provider is named yet.",
+    ],
+    "boundary-data-handling": [
+      boundaryPreview.includesCui
+        ? "CUI handling is currently in scope for the program view."
+        : "CUI handling is not currently recorded in scope.",
+      boundaryPreview.unresolvedScopeQuestions.length > 0
+        ? `Open scope gaps: ${boundaryPreview.unresolvedScopeQuestions.join(" ")}`
+        : "No unresolved scope gaps are currently flagged.",
+    ],
+  };
+
+  return signals[capabilityId] ?? ["No evidence signals are defined for this capability yet."];
 }
 
 function splitCommaList(value?: string) {
