@@ -193,3 +193,32 @@ export interface OnboardingState {
   evidenceReferences: Record<string, EvidenceReference[]>;
   boundaryPreview: BoundarySummary;
 }
+
+export interface CapabilitySummary {
+  id: string;
+  name: string;
+  maturityScore: number;
+  confidenceScore: number;
+  summary: string;
+  topGap: string;
+}
+
+export interface InitiativePreview {
+  id: string;
+  title: string;
+  priority: "do-now" | "do-next" | "plan-this-quarter";
+  rationale: string;
+  targetCapabilityIds: string[];
+}
+
+export interface ProgramBaselineState {
+  engagement: Engagement;
+  summary: {
+    operatingProfile: string;
+    strongestArea: string;
+    weakestArea: string;
+    confidenceNote: string;
+  };
+  capabilities: CapabilitySummary[];
+  roadmapPreview: InitiativePreview[];
+}

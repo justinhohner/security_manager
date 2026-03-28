@@ -142,6 +142,9 @@ export function EngagementWorkspace({ initialState }: { initialState: Onboarding
         <div className={styles.boundaryBadge}>
           <span>Boundary confidence</span>
           <strong>{state.boundaryPreview.confidence}/5</strong>
+          <Link className={styles.assessmentLink} href={`/engagements/${state.engagement.id}/program`}>
+            Open program workspace
+          </Link>
           <Link className={styles.assessmentLink} href={`/engagements/${state.engagement.id}/assessment`}>
             Open assessment view
           </Link>
