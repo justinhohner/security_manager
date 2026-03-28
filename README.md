@@ -35,6 +35,7 @@ The product should support a staged workflow:
 
 - [Project Architecture](./docs/architecture.md)
 - [Architecture Decision Records](./docs/adr/README.md)
+- [ADR 0002: Onboarding Interaction Model](./docs/adr/0002-onboarding-interaction-model.md)
 - [Initial GitHub Issue Draft](./docs/github-issue-bootstrap.md)
 
 ## Working Agreement

@@ -21,6 +21,26 @@ The system should not treat "secure" as a fixed end state. It should support a c
 4. Prioritization should balance risk, cost, contractual urgency, and operational impact.
 5. Human reviewers stay in the loop for major scoping, interpretation, and remediation decisions.
 
+## Interface Direction
+
+The product will begin as a single application with role-based views rather than separate user-facing products.
+
+The primary v1 users are experienced consultants and assessors. Client-facing output should be generated through exports and reports rather than a dedicated client login or interactive session.
+
+The primary onboarding experience in v1 will be a hybrid of:
+
+- structured questionnaire sections
+- guided follow-up questions
+- limited freeform notes
+
+This means the application should present a clear, section-based workflow while allowing the system to ask additional inline questions when answers imply ambiguity, missing scope details, or elevated risk.
+
+Deferred onboarding modes should be treated as future enhancements:
+
+- dedicated live interview mode
+- non-linear case file onboarding
+- import-first onboarding
+
 ## Primary Agent Roles
 
 ### Company Onboarding Agent
@@ -123,6 +143,35 @@ Key entities:
 8. Prioritize remediation.
 9. Track remediation and reassess.
 
+## Onboarding Experience
+
+Onboarding should be section-based first rather than system-based first.
+
+The initial interaction pattern should favor consistent data capture:
+
+- use a 1 to 5 scale for evaluative questions
+- include fill-in fields when details are needed to support the score
+- keep freeform note-taking minimal in v1
+- show follow-up questions inline as soon as the current answer creates a need for clarification
+
+This keeps the workflow structured enough for repeatable consulting work while preserving adaptive discovery where it matters.
+
+## Trusted Findings
+
+Every finding should expose enough information for an experienced consultant or assessor to inspect and challenge the system's reasoning.
+
+The minimum visible schema for a trusted finding is:
+
+- requirement affected
+- finding statement
+- why the finding exists
+- evidence used
+- evidence missing
+- confidence
+- impact
+- recommended remediation
+- priority rationale
+
 ## Initial MVP
 
 The first implementation should stay narrow and practical:
@@ -139,6 +188,7 @@ The first implementation should stay narrow and practical:
 ## Open Questions
 
 - How opinionated should the system be about assessment boundary proposals?
-- What evidence types should be mandatory before a finding is considered high confidence?
 - Which technical scans belong in the MVP versus a later phase?
 - How should resilience scoring be represented alongside compliance posture?
+- What exact 1 to 5 scale labels should onboarding use for different question types?
+- How should inline follow-up questions be visually distinguished from baseline questions?
