@@ -10,6 +10,8 @@ import {
 } from "@/lib/types";
 
 const SCALE_HELPER = "1 = absent or unknown, 5 = well established and evidenced";
+const OUTSOURCED_PROVIDER_QUESTION = "outsourced-it-provider";
+const CUI_LOCATION_QUESTION = "cui-storage-location";
 
 export const SECTION_ORDER: Array<{ id: SectionId; title: string; description: string }> = [
   {
@@ -223,7 +225,7 @@ export function buildBoundarySummary(answerMap: Record<string, Answer>): Boundar
   const includesCui = answerMap["handles-cui"]?.value === "true";
   const includesFci = answerMap["handles-fci"]?.value === "true";
   const systemNames = splitCommaList(answerMap["core-systems"]?.value);
-  const cuiLocations = splitCommaList(answerMap["cui-storage-location"]?.value);
+  const cuiLocations = splitCommaList(answerMap[CUI_LOCATION_QUESTION]?.value);
   const exclusions = splitCommaList(answerMap["boundary-exclusions"]?.value);
   const protectedSystems = includesCui && systemNames.length > 0 ? [systemNames[0]] : [];
   const unresolvedScopeQuestions: string[] = [];
@@ -233,7 +235,7 @@ export function buildBoundarySummary(answerMap: Record<string, Answer>): Boundar
     unresolvedScopeQuestions.push("CUI is present, but the storage or processing location is still undefined.");
   }
 
-  if (answerMap["outsourced-it"]?.value === "true" && !answerMap["outsourced-it-provider"]?.value?.trim()) {
+  if (answerMap["outsourced-it"]?.value === "true" && !answerMap[OUTSOURCED_PROVIDER_QUESTION]?.value?.trim()) {
     unresolvedScopeQuestions.push("Outsourced IT is in use, but the responsible provider is still unnamed.");
   }
 
@@ -278,6 +280,70 @@ export function answerToRecord(engagementId: string, input: AnswerInput): Answer
     value: input.value,
     rationale: input.rationale,
   };
+}
+
+export function buildSystemSnapshots(answerMap: Record<string, Answer>) {
+  const inScopeSystems = splitCommaList(answerMap["core-systems"]?.value);
+  const cuiLocations = splitCommaList(answerMap[CUI_LOCATION_QUESTION]?.value);
+  const protectedSystems = new Set<string>();
+  const systems = new Map<
+    string,
+    {
+      name: string;
+      storesCui: boolean;
+      processesCui: boolean;
+      transmitsCui: boolean;
+      protectsCui: boolean;
+    }
+  >();
+
+  for (const name of inScopeSystems) {
+    systems.set(name, {
+      name,
+      storesCui: false,
+      processesCui: false,
+      transmitsCui: false,
+      protectsCui: false,
+    });
+  }
+
+  for (const name of cuiLocations) {
+    const existing = systems.get(name) ?? {
+      name,
+      storesCui: false,
+      processesCui: false,
+      transmitsCui: false,
+      protectsCui: false,
+    };
+
+    systems.set(name, {
+      ...existing,
+      storesCui: true,
+      processesCui: true,
+      transmitsCui: true,
+    });
+  }
+
+  if (answerMap["handles-cui"]?.value === "true" && inScopeSystems.length > 0) {
+    protectedSystems.add(inScopeSystems[0]);
+  }
+
+  for (const name of protectedSystems) {
+    const existing = systems.get(name) ?? {
+      name,
+      storesCui: false,
+      processesCui: false,
+      transmitsCui: false,
+      protectsCui: false,
+    };
+
+    systems.set(name, {
+      ...existing,
+      protectsCui: true,
+    });
+  }
+
+  return Array.from(systems.values());
 }
 
 function getFollowUpQuestion(questionId: string): Question {

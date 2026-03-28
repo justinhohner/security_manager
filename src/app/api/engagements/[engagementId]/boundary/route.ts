@@ -10,11 +10,11 @@ export async function GET(
   void request;
   const { engagementId } = await params;
 
-  if (!getEngagement(engagementId)) {
+  if (!(await getEngagement(engagementId))) {
     return NextResponse.json({ error: "Engagement not found" }, { status: 404 });
   }
 
   return NextResponse.json({
-    boundary: getBoundarySummary(engagementId),
+    boundary: await getBoundarySummary(engagementId),
   });
 }

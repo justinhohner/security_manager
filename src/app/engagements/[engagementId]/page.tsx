@@ -10,7 +10,7 @@ export default async function EngagementPage({
   params: Promise<{ engagementId: string }>;
 }) {
   const { engagementId } = await params;
-  const state = getOnboardingState(engagementId);
+  const state = await getOnboardingState(engagementId);
 
   if (!state) {
     notFound();

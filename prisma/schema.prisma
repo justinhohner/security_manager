@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
 }
 
 datasource db {
@@ -20,10 +21,10 @@ model Engagement {
   companyId          String
   engagementName     String
   targetFrameworks   String[]
-  targetCmmcLevel    String?
+  targetCmmcLevel    String              @default("Level 2")
   leadAssessor       String?
   currentStage       String              @default("onboarding")
-  currentSectionId   String?
+  currentSectionId   String              @default("engagement-setup")
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   company            Company             @relation(fields: [companyId], references: [id])
@@ -79,6 +80,8 @@ model Answer {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   engagement      Engagement  @relation(fields: [engagementId], references: [id])
+
+  @@unique([engagementId, questionId])
 }
 
 model Decision {

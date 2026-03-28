@@ -10,7 +10,7 @@ export async function POST(
 ) {
   const { engagementId } = await params;
   const body = (await request.json()) as AnswerInput;
-  const state = saveAnswer(engagementId, body);
+  const state = await saveAnswer(engagementId, body);
 
   if (!state) {
     return NextResponse.json({ error: "Engagement not found" }, { status: 404 });

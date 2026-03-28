@@ -9,7 +9,7 @@ export async function GET(
 ) {
   void request;
   const { engagementId } = await params;
-  const state = getOnboardingState(engagementId);
+  const state = await getOnboardingState(engagementId);
 
   if (!state) {
     return NextResponse.json({ error: "Engagement not found" }, { status: 404 });

@@ -5,12 +5,12 @@ import { createEngagement, listEngagements } from "@/lib/store";
 
 export async function GET() {
   return NextResponse.json({
-    engagements: listEngagements(),
+    engagements: await listEngagements(),
   });
 }
 
 export async function POST() {
-  const engagement = createEngagement();
+  const engagement = await createEngagement();
 
   return NextResponse.json(
     {

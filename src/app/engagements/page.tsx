@@ -3,6 +3,6 @@
 import { EngagementList } from "@/components/engagement-list";
 import { listEngagements } from "@/lib/store";
 
-export default function EngagementsPage() {
-  return <EngagementList initialEngagements={listEngagements()} />;
+export default async function EngagementsPage() {
+  return <EngagementList initialEngagements={await listEngagements()} />;
 }

@@ -23,12 +23,12 @@ export async function PATCH(
     return NextResponse.json({ error: "Section not found" }, { status: 404 });
   }
 
-  const engagement = setCurrentSection(engagementId, sectionId as SectionId);
+  const engagement = await setCurrentSection(engagementId, sectionId as SectionId);
 
   if (!engagement) {
     return NextResponse.json({ error: "Engagement not found" }, { status: 404 });
   }
 
-  const state = getOnboardingState(engagementId);
+  const state = await getOnboardingState(engagementId);
   return NextResponse.json({ state });
 }

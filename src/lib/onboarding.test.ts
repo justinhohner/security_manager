@@ -1,7 +1,7 @@
 // ABOUTME: Tests deterministic onboarding follow-up and boundary summary rules.
 // ABOUTME: Protects the core slice logic from silent behavior drift.
 import { describe, expect, it } from "vitest";
-import { answerToRecord, buildBoundarySummary, buildFollowUpQuestions } from "@/lib/onboarding";
+import { answerToRecord, buildBoundarySummary, buildFollowUpQuestions, buildSystemSnapshots } from "@/lib/onboarding";
 import type { Answer } from "@/lib/types";
 
 describe("buildFollowUpQuestions", () => {
@@ -59,5 +59,43 @@ describe("buildBoundarySummary", () => {
       "CUI is present, but the storage or processing location is still undefined.",
     );
     expect(summary.confidence).toBe(3);
+  });
+});
+
+describe("buildSystemSnapshots", () => {
+  it("derives in-scope and protected systems from saved onboarding answers", () => {
+    const answers: Record<string, Answer> = {
+      "handles-cui": answerToRecord("eng-1", {
+        questionId: "handles-cui",
+        value: "true",
+      }),
+      "core-systems": answerToRecord("eng-1", {
+        questionId: "core-systems",
+        value: "Microsoft 365, Jira",
+      }),
+      "cui-storage-location": answerToRecord("eng-1", {
+        questionId: "cui-storage-location",
+        value: "Microsoft 365",
+      }),
+    };
+
+    const systems = buildSystemSnapshots(answers);
+
+    expect(systems).toEqual([
+      {
+        name: "Microsoft 365",
+        storesCui: true,
+        processesCui: true,
+        transmitsCui: true,
+        protectsCui: true,
+      },
+      {
+        name: "Jira",
+        storesCui: false,
+        processesCui: false,
+        transmitsCui: false,
+        protectsCui: false,
+      },
+    ]);
   });
 });

@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: npm run dev
+    command: sh -c "npm run db:push && npm run dev"
     working_dir: /workspace
     environment:
       DATABASE_URL: postgresql://security_manager:security_manager@db:5432/security_manager
