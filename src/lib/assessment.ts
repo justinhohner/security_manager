@@ -6,8 +6,11 @@ import type {
   AssessmentState,
   Engagement,
   EvidenceReference,
+  Finding,
+  FindingInput,
   RequirementAssessment,
   RequirementAssessmentStatus,
+  RequirementDetail,
   RequirementDetailState,
 } from "@/lib/types";
 
@@ -85,6 +88,7 @@ export function buildRequirementDetailState(input: {
   requirementId: string;
   answers: Record<string, Answer>;
   evidenceByQuestionId: Record<string, EvidenceReference[]>;
+  findings: Finding[];
 }): RequirementDetailState | undefined {
   const definition = STARTER_REQUIREMENTS.find((requirement) => requirement.id === input.requirementId);
 
@@ -118,6 +122,7 @@ export function buildRequirementDetailState(input: {
       questionDetails,
       nextAction: buildNextAction(requirement),
       findingCandidate: buildFindingCandidate(requirement),
+      findings: input.findings.filter((finding) => finding.requirementId === definition.id),
     },
   };
 }
@@ -220,5 +225,16 @@ function buildFindingCandidate(requirement: RequirementAssessment) {
     statement:
       "This mapped requirement area does not yet have onboarding support and is likely to require more discovery before assessment work can proceed.",
     impact: "High uncertainty because the requirement area has not been supported with onboarding data.",
+  };
+}
+
+export function buildFindingInput(requirement: RequirementDetail): FindingInput {
+  return {
+    requirementId: requirement.id,
+    controlId: requirement.controlId,
+    title: requirement.findingCandidate.title,
+    statement: requirement.findingCandidate.statement,
+    impact: requirement.findingCandidate.impact,
+    status: "candidate",
   };
 }

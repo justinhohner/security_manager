@@ -70,6 +70,27 @@ export interface EvidenceReferenceInput {
   note?: string;
 }
 
+export interface Finding {
+  id: string;
+  engagementId: string;
+  requirementId: string;
+  controlId: string;
+  title: string;
+  statement: string;
+  impact: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface FindingInput {
+  requirementId: string;
+  controlId: string;
+  title: string;
+  statement: string;
+  impact: string;
+  status: string;
+}
+
 export interface SectionStatus {
   id: SectionId;
   title: string;
@@ -134,6 +155,7 @@ export interface RequirementDetail extends RequirementAssessment {
     statement: string;
     impact: string;
   };
+  findings: Finding[];
 }
 
 export interface AssessmentState {

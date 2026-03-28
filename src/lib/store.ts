@@ -1,10 +1,10 @@
 // ABOUTME: Persists engagement workflow state through Prisma for the first slice.
-// ABOUTME: Keeps onboarding, boundary state, and seeded sample data aligned.
-import { buildAssessmentState, buildRequirementDetailState } from "@/lib/assessment";
+// ABOUTME: Keeps onboarding, boundary state, assessment detail, and findings aligned.
+import { buildAssessmentState, buildFindingInput, buildRequirementDetailState } from "@/lib/assessment";
 import { prisma } from "@/lib/prisma";
 import { BASELINE_QUESTIONS, SECTION_ORDER, buildBoundarySummary, buildFollowUpQuestions, buildSectionStatuses } from "@/lib/onboarding";
 import { buildManualSystems, mapAnswers, mapEvidenceReferences, resolveBoundarySummary, synchronizeBoundary } from "@/lib/persistence";
-import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type Engagement, type EvidenceReferenceInput, type OnboardingState, type RequirementDetailState, type SectionId } from "@/lib/types";
+import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type Engagement, type EvidenceReferenceInput, type Finding, type OnboardingState, type RequirementDetailState, type SectionId } from "@/lib/types";
 
 export async function listEngagements(): Promise<Engagement[]> {
   const engagements = await prisma.engagement.findMany({
@@ -335,6 +335,11 @@ export async function getRequirementDetailState(
           },
         },
       },
+      findings: {
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
     },
   });
 
@@ -347,7 +352,35 @@ export async function getRequirementDetailState(
     requirementId,
     answers: mapAnswers(engagement.answers),
     evidenceByQuestionId: mapEvidenceReferences(engagement.evidenceReferences),
+    findings: engagement.findings.map(mapFindingRecord),
   });
+}
+
+export async function createFindingCandidate(
+  engagementId: string,
+  requirementId: string,
+): Promise<RequirementDetailState | undefined> {
+  const detail = await getRequirementDetailState(engagementId, requirementId);
+
+  if (!detail) {
+    return undefined;
+  }
+
+  const input = buildFindingInput(detail.requirement);
+
+  await prisma.finding.create({
+    data: {
+      engagementId,
+      requirementId: input.requirementId,
+      controlId: input.controlId,
+      title: input.title,
+      statement: input.statement,
+      impact: input.impact,
+      status: input.status,
+    },
+  });
+
+  return getRequirementDetailState(engagementId, requirementId);
 }
 
 async function synchronizeEngagementFields(engagementId: string, input: AnswerInput) {
@@ -400,3 +433,29 @@ function mapEngagementRecord(record: {
     currentSectionId: record.currentSectionId as SectionId,
   };
 }
+
+function mapFindingRecord(record: FindingRecord): Finding {
+  return {
+    id: record.id,
+    engagementId: record.engagementId,
+    requirementId: record.requirementId,
+    controlId: record.controlId,
+    title: record.title,
+    statement: record.statement,
+    impact: record.impact,
+    status: record.status,
+    createdAt: record.createdAt.toISOString(),
+  };
+}
+
+type FindingRecord = {
+  id: string;
+  engagementId: string;
+  requirementId: string;
+  controlId: string;
+  title: string;
+  statement: string;
+  impact: string;
+  status: string;
+  createdAt: Date;
+};
