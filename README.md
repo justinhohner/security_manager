@@ -38,6 +38,7 @@ The product should support a staged workflow:
 - [Domain Model](./docs/domain-model.md)
 - [Screen Map](./docs/screen-map.md)
 - [API Contract Draft](./docs/api-contract.md)
+- [Vertical Slice 001](./docs/vertical-slice-001.md)
 - [Architecture Decision Records](./docs/adr/README.md)
 - [ADR 0002: Onboarding Interaction Model](./docs/adr/0002-onboarding-interaction-model.md)
 - [Initial GitHub Issue Draft](./docs/github-issue-bootstrap.md)
