@@ -1,10 +1,16 @@
 // ABOUTME: Displays the dedicated roadmap workspace for saved program initiatives.
 // ABOUTME: Gives consultants a stable list/detail handoff point for planning work.
+"use client";
+
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import type { RoadmapWorkspaceState } from "@/lib/types";
 import styles from "./roadmap-workspace.module.css";
 
 export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
+  const [activeView, setActiveView] = useState<keyof RoadmapWorkspaceState["views"]>("all");
+  const visibleInitiatives = useMemo(() => state.views[activeView], [activeView, state.views]);
+
   return (
     <main className={styles.page}>
       <section className={styles.headerCard}>
@@ -50,8 +56,38 @@ export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
 
       <section className={styles.card}>
         <h2>Saved initiatives</h2>
+        <div className={styles.filterBar}>
+          <button
+            className={activeView === "all" ? styles.activeFilter : styles.filterButton}
+            onClick={() => setActiveView("all")}
+            type="button"
+          >
+            All ({state.views.all.length})
+          </button>
+          <button
+            className={activeView === "blocked" ? styles.activeFilter : styles.filterButton}
+            onClick={() => setActiveView("blocked")}
+            type="button"
+          >
+            Blocked ({state.views.blocked.length})
+          </button>
+          <button
+            className={activeView === "stale" ? styles.activeFilter : styles.filterButton}
+            onClick={() => setActiveView("stale")}
+            type="button"
+          >
+            Stale ({state.views.stale.length})
+          </button>
+          <button
+            className={activeView === "completed" ? styles.activeFilter : styles.filterButton}
+            onClick={() => setActiveView("completed")}
+            type="button"
+          >
+            Completed ({state.views.completed.length})
+          </button>
+        </div>
         <div className={styles.stack}>
-          {state.initiatives.map((initiative) => (
+          {visibleInitiatives.map((initiative) => (
             <div className={styles.initiativeCard} key={initiative.id}>
               <div className={styles.cardHeader}>
                 <h3>{initiative.title}</h3>
@@ -89,7 +125,7 @@ export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
               </Link>
             </div>
           ))}
-          {state.initiatives.length === 0 ? <p className={styles.copy}>No saved initiatives yet.</p> : null}
+          {visibleInitiatives.length === 0 ? <p className={styles.copy}>No initiatives match the current view.</p> : null}
         </div>
       </section>
     </main>

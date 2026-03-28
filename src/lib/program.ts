@@ -123,6 +123,12 @@ export function buildRoadmapWorkspaceState(input: {
   return {
     engagement: input.engagement,
     initiatives,
+    views: {
+      all: initiatives,
+      blocked: initiatives.filter((initiative) => initiative.blockers?.trim()),
+      stale: initiatives.filter((initiative) => initiative.isStale),
+      completed: initiatives.filter((initiative) => initiative.status === "completed"),
+    },
     counts,
     nextFocus: buildRoadmapFocus(counts),
   };

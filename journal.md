@@ -18,3 +18,4 @@
 - Added a lightweight outcome field for initiatives so completed work can capture what changed or was delivered instead of ending as a bare status transition.
 - Added a last-status-change timestamp for initiatives so consultants can tell when roadmap items last moved without opening each record.
 - Added a stale-work cue to the roadmap so active initiatives that have not moved recently are called out directly in the summary and list view.
+- Added lightweight roadmap views for all, blocked, stale, and completed work so consultants can focus the roadmap without scanning one long list.

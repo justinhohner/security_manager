@@ -27,8 +27,17 @@
   flex-wrap: wrap;
 }
 
+.filterBar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
 .secondaryButton,
-.detailLink {
+.detailLink,
+.filterButton,
+.activeFilter {
   padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -38,6 +47,18 @@
 .detailLink {
   display: inline-flex;
   margin-top: 14px;
+}
+
+.filterButton,
+.activeFilter {
+  cursor: pointer;
+  font: inherit;
+}
+
+.activeFilter {
+  color: white;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .kicker {

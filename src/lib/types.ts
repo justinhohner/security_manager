@@ -265,6 +265,12 @@ export interface InitiativeDetailState {
 export interface RoadmapWorkspaceState {
   engagement: Engagement;
   initiatives: Initiative[];
+  views: {
+    all: Initiative[];
+    blocked: Initiative[];
+    stale: Initiative[];
+    completed: Initiative[];
+  };
   counts: {
     candidate: number;
     planned: number;

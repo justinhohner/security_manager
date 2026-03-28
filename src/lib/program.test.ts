@@ -346,4 +346,52 @@ describe("buildRoadmapWorkspaceState", () => {
     expect(state.initiatives[0]?.isStale).toBe(true);
     expect(state.initiatives[1]?.isStale).toBe(false);
   });
+
+  it("builds named roadmap views for focused review", () => {
+    const state = buildRoadmapWorkspaceState({
+      engagement,
+      now: "2026-04-30T12:00:00.000Z",
+      initiatives: [
+        {
+          id: "initiative-1",
+          engagementId: "eng-1",
+          title: "Blocked identity review",
+          summary: "Summary",
+          priority: "do-now",
+          targetCapabilityIds: ["identity-access"],
+          status: "planned",
+          blockers: "Waiting on admin access approval.",
+          statusChangedAt: "2026-04-20T12:00:00.000Z",
+          createdAt: "2026-03-28T00:00:00.000Z",
+        },
+        {
+          id: "initiative-2",
+          engagementId: "eng-1",
+          title: "Stale inventory cleanup",
+          summary: "Summary",
+          priority: "do-next",
+          targetCapabilityIds: ["asset-configuration"],
+          status: "in-progress",
+          statusChangedAt: "2026-04-01T12:00:00.000Z",
+          createdAt: "2026-03-28T01:00:00.000Z",
+        },
+        {
+          id: "initiative-3",
+          engagementId: "eng-1",
+          title: "Completed governance cleanup",
+          summary: "Summary",
+          priority: "plan-this-quarter",
+          targetCapabilityIds: ["governance-policy"],
+          status: "completed",
+          statusChangedAt: "2026-04-25T12:00:00.000Z",
+          createdAt: "2026-03-28T02:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(state.views.all).toHaveLength(3);
+    expect(state.views.blocked.map((initiative) => initiative.id)).toEqual(["initiative-1"]);
+    expect(state.views.stale.map((initiative) => initiative.id)).toEqual(["initiative-2"]);
+    expect(state.views.completed.map((initiative) => initiative.id)).toEqual(["initiative-3"]);
+  });
 });
