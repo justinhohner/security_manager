@@ -266,6 +266,7 @@ export interface RoadmapWorkspaceState {
     candidate: number;
     planned: number;
     inProgress: number;
+    blocked: number;
   };
   nextFocus: string;
 }

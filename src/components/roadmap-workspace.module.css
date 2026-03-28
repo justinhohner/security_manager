@@ -53,6 +53,14 @@
   color: var(--muted);
 }
 
+.blocker {
+  color: #7a2e0b;
+  background: #fff1e8;
+  border: 1px solid #f2c1a9;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
 .summaryGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

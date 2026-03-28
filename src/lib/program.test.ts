@@ -180,6 +180,7 @@ describe("buildRoadmapWorkspaceState", () => {
       candidate: 1,
       planned: 1,
       inProgress: 0,
+      blocked: 0,
     });
     expect(state.nextFocus).toContain("1 candidate");
   });
@@ -232,5 +233,38 @@ describe("buildRoadmapWorkspaceState", () => {
     ]);
     expect(state.initiatives[0]?.owner).toBe("Alex");
     expect(state.initiatives[0]?.targetDate).toBe("2026-04-15");
+  });
+
+  it("surfaces blocked work in the roadmap summary", () => {
+    const state = buildRoadmapWorkspaceState({
+      engagement,
+      initiatives: [
+        {
+          id: "initiative-1",
+          engagementId: "eng-1",
+          title: "Identity validation",
+          summary: "Summary",
+          priority: "do-now",
+          targetCapabilityIds: ["identity-access"],
+          status: "planned",
+          blockers: "Waiting on admin access approval.",
+          createdAt: "2026-03-28T00:00:00.000Z",
+        },
+        {
+          id: "initiative-2",
+          engagementId: "eng-1",
+          title: "Inventory cleanup",
+          summary: "Summary",
+          priority: "do-next",
+          targetCapabilityIds: ["asset-configuration"],
+          status: "in-progress",
+          createdAt: "2026-03-28T01:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(state.counts.blocked).toBe(1);
+    expect(state.nextFocus).toContain("1 initiative");
+    expect(state.nextFocus).toContain("blocked");
   });
 });

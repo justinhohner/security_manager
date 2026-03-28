@@ -36,6 +36,9 @@ export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
           <p className={styles.copy}>
             <strong>In progress:</strong> {state.counts.inProgress}
           </p>
+          <p className={styles.copy}>
+            <strong>Blocked:</strong> {state.counts.blocked}
+          </p>
         </article>
       </section>
 
@@ -58,6 +61,11 @@ export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
               <p className={styles.copy}>
                 <strong>Target date:</strong> {initiative.targetDate ?? "Not scheduled"}
               </p>
+              {initiative.blockers?.trim() ? (
+                <p className={styles.blocker}>
+                  <strong>Blocked:</strong> {initiative.blockers}
+                </p>
+              ) : null}
               <Link
                 className={styles.detailLink}
                 href={`/engagements/${state.engagement.id}/program/initiatives/${initiative.id}`}

@@ -108,6 +108,7 @@ export function buildRoadmapWorkspaceState(input: {
     candidate: initiatives.filter((initiative) => initiative.status === "candidate").length,
     planned: initiatives.filter((initiative) => initiative.status === "planned").length,
     inProgress: initiatives.filter((initiative) => initiative.status === "in-progress").length,
+    blocked: initiatives.filter((initiative) => initiative.blockers?.trim()).length,
   };
 
   return {
@@ -319,6 +320,10 @@ function buildNextStatusOptions(status: Initiative["status"]): Array<"planned" |
 }
 
 function buildRoadmapFocus(counts: RoadmapWorkspaceState["counts"]) {
+  if (counts.blocked > 0) {
+    return `${counts.blocked} initiative${counts.blocked === 1 ? "" : "s"} currently blocked and need unblock decisions.`;
+  }
+
   if (counts.candidate > 0) {
     return `${counts.candidate} candidate initiatives still need planning review.`;
   }
