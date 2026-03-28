@@ -231,6 +231,7 @@ export interface Initiative {
   notes?: string;
   blockers?: string;
   outcome?: string;
+  statusChangedAt?: string;
   createdAt: string;
 }
 

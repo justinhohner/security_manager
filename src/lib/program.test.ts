@@ -158,11 +158,13 @@ describe("buildInitiativeDetailState", () => {
         priority: "do-next",
         targetCapabilityIds: ["identity-access"],
         status: "in-progress",
+        statusChangedAt: "2026-03-30T12:00:00.000Z",
         createdAt: "2026-03-28T00:00:00.000Z",
       },
     });
 
     expect(detail.initiative.nextStatusOptions).toEqual(["completed"]);
+    expect(detail.initiative.statusChangedAt).toBe("2026-03-30T12:00:00.000Z");
   });
 
   it("carries outcome detail for completed initiatives", () => {

@@ -148,6 +148,7 @@ model Initiative {
   notes             String?
   blockers          String?
   outcome           String?
+  statusChangedAt   DateTime?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   engagement        Engagement  @relation(fields: [engagementId], references: [id])

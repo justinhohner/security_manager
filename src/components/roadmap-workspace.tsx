@@ -59,6 +59,9 @@ export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
                 <strong>Status:</strong> {initiative.status}
               </p>
               <p className={styles.copy}>
+                <strong>Last status change:</strong> {formatTimestamp(initiative.statusChangedAt)}
+              </p>
+              <p className={styles.copy}>
                 <strong>Owner:</strong> {initiative.owner?.trim() ? initiative.owner : "Unassigned"}
               </p>
               <p className={styles.copy}>
@@ -87,4 +90,15 @@ export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
       </section>
     </main>
   );
+}
+
+function formatTimestamp(value?: string) {
+  if (!value) {
+    return "Not recorded";
+  }
+
+  return new Date(value).toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }

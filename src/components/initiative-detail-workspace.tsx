@@ -85,6 +85,9 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
           <strong>Status:</strong> {state.initiative.status}
         </p>
         <p className={styles.copy}>
+          <strong>Last status change:</strong> {formatTimestamp(state.initiative.statusChangedAt)}
+        </p>
+        <p className={styles.copy}>
           <strong>Owner:</strong> {state.initiative.owner ?? "Not assigned"}
         </p>
         <p className={styles.copy}>
@@ -187,4 +190,15 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
       </section>
     </main>
   );
+}
+
+function formatTimestamp(value?: string) {
+  if (!value) {
+    return "Not recorded";
+  }
+
+  return new Date(value).toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }

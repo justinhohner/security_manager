@@ -245,6 +245,7 @@ export async function createInitiativeCandidate(
       priority: input.priority,
       targetCapabilityIds: input.targetCapabilityIds,
       status: input.status,
+      statusChangedAt: new Date(),
     },
   });
 
@@ -290,7 +291,10 @@ export async function updateInitiativeStatus(
 
   await prisma.initiative.update({
     where: { id: initiativeId },
-    data: { status },
+    data: {
+      status,
+      statusChangedAt: new Date(),
+    },
   });
 
   return getInitiativeDetailState(engagementId, initiativeId);
@@ -657,6 +661,7 @@ function mapInitiativeRecord(record: InitiativeRecord): Initiative {
     notes: record.notes ?? undefined,
     blockers: record.blockers ?? undefined,
     outcome: record.outcome ?? undefined,
+    statusChangedAt: record.statusChangedAt?.toISOString() ?? record.createdAt.toISOString(),
     createdAt: record.createdAt.toISOString(),
   };
 }
@@ -690,5 +695,6 @@ type InitiativeRecord = {
   notes: string | null;
   blockers: string | null;
   outcome: string | null;
+  statusChangedAt: Date | null;
   createdAt: Date;
 };
