@@ -59,6 +59,14 @@
   font-size: 2rem;
 }
 
+.assessmentLink {
+  display: inline-flex;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
 .workspace {
   display: grid;
   grid-template-columns: 260px minmax(0, 1.35fr) minmax(280px, 0.8fr);

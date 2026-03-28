@@ -100,6 +100,33 @@ export interface BoundaryUpdateInput {
   confidence?: number;
 }
 
+export type RequirementAssessmentStatus = "not-started" | "partial" | "supported";
+
+export interface RequirementAssessment {
+  id: string;
+  framework: string;
+  family: string;
+  controlId: string;
+  title: string;
+  description: string;
+  status: RequirementAssessmentStatus;
+  evidenceCount: number;
+  answeredQuestionIds: string[];
+  missingQuestionIds: string[];
+  mappedQuestionIds: string[];
+  rationale: string;
+}
+
+export interface AssessmentState {
+  engagement: Engagement;
+  requirements: RequirementAssessment[];
+  counts: {
+    notStarted: number;
+    partial: number;
+    supported: number;
+  };
+}
+
 export interface OnboardingState {
   engagement: Engagement;
   sections: SectionStatus[];

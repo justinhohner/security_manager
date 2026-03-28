@@ -1,0 +1,164 @@
+.page {
+  padding: 28px;
+}
+
+.headerCard,
+.requirementCard,
+.supportedCard,
+.partialCard,
+.idleCard {
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.headerCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  max-width: 1280px;
+  margin: 0 auto 20px;
+  padding: 28px 32px;
+}
+
+.kicker,
+.meta {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.headerCard h1,
+.requirementCard h2,
+.requirementCard h3 {
+  margin: 0;
+}
+
+.subtle,
+.description,
+.rationale,
+.grid p,
+.grid li {
+  color: var(--muted);
+}
+
+.secondaryButton {
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: white;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 1280px;
+  margin: 0 auto 20px;
+}
+
+.supportedCard,
+.partialCard,
+.idleCard {
+  padding: 20px;
+}
+
+.supportedCard {
+  background: rgba(29, 127, 116, 0.14);
+}
+
+.partialCard {
+  background: rgba(143, 91, 46, 0.14);
+}
+
+.idleCard {
+  background: rgba(31, 40, 51, 0.06);
+}
+
+.supportedCard strong,
+.partialCard strong,
+.idleCard strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 2rem;
+}
+
+.requirementList {
+  display: grid;
+  gap: 16px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.requirementCard {
+  padding: 24px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.statusSupported,
+.statusPartial,
+.statusIdle {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  text-transform: capitalize;
+}
+
+.statusSupported {
+  color: #0e5a5a;
+  background: rgba(29, 127, 116, 0.16);
+}
+
+.statusPartial {
+  color: #8f5b2e;
+  background: rgba(143, 91, 46, 0.16);
+}
+
+.statusIdle {
+  color: var(--muted);
+  background: rgba(31, 40, 51, 0.08);
+}
+
+.description {
+  margin: 16px 0 8px;
+}
+
+.rationale {
+  margin: 0 0 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.grid ul {
+  padding-left: 18px;
+}
+
+.grid li + li {
+  margin-top: 6px;
+}
+
+@media (max-width: 980px) {
+  .summaryGrid,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .headerCard,
+  .cardHeader {
+    flex-direction: column;
+  }
+}

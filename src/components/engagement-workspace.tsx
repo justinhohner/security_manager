@@ -2,6 +2,7 @@
 // ABOUTME: Coordinates the first end-to-end consultant interaction loop.
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { Answer, OnboardingState, Question, SectionId } from "@/lib/types";
 import styles from "./engagement-workspace.module.css";
@@ -140,6 +141,9 @@ export function EngagementWorkspace({ initialState }: { initialState: Onboarding
         <div className={styles.boundaryBadge}>
           <span>Boundary confidence</span>
           <strong>{state.boundaryPreview.confidence}/5</strong>
+          <Link className={styles.assessmentLink} href={`/engagements/${state.engagement.id}/assessment`}>
+            Open assessment view
+          </Link>
         </div>
       </section>
 
