@@ -2,7 +2,7 @@
 // ABOUTME: Keeps capability and roadmap preview logic aligned to the new product direction.
 import { describe, expect, it } from "vitest";
 import { answerToRecord, buildBoundarySummary } from "@/lib/onboarding";
-import { buildCapabilityDetailState, buildInitiativeDetailState, buildInitiativeInput, buildProgramBaselineState } from "@/lib/program";
+import { buildCapabilityDetailState, buildInitiativeDetailState, buildInitiativeInput, buildProgramBaselineState, buildRoadmapWorkspaceState } from "@/lib/program";
 
 const engagement = {
   id: "eng-1",
@@ -137,5 +137,42 @@ describe("buildInitiativeDetailState", () => {
 
     expect(detail.initiative.whyNow).toContain("do now");
     expect(detail.initiative.nextStatusOptions).toEqual(["planned", "in-progress"]);
+  });
+});
+
+describe("buildRoadmapWorkspaceState", () => {
+  it("groups initiatives by status for the roadmap workspace", () => {
+    const state = buildRoadmapWorkspaceState({
+      engagement,
+      initiatives: [
+        {
+          id: "initiative-1",
+          engagementId: "eng-1",
+          title: "Stabilize governance and policy baseline",
+          summary: "Summary",
+          priority: "do-now",
+          targetCapabilityIds: ["governance-policy"],
+          status: "candidate",
+          createdAt: "2026-03-28T00:00:00.000Z",
+        },
+        {
+          id: "initiative-2",
+          engagementId: "eng-1",
+          title: "Validate core identity control coverage",
+          summary: "Summary",
+          priority: "plan-this-quarter",
+          targetCapabilityIds: ["identity-access"],
+          status: "planned",
+          createdAt: "2026-03-28T00:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(state.counts).toEqual({
+      candidate: 1,
+      planned: 1,
+      inProgress: 0,
+    });
+    expect(state.nextFocus).toContain("1 candidate");
   });
 });

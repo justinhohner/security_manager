@@ -39,6 +39,9 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
           <p className={styles.subtle}>{state.engagement.companyName}</p>
         </div>
         <div className={styles.headerActions}>
+          <Link className={styles.secondaryButton} href={`/engagements/${state.engagement.id}/program/roadmap`}>
+            Open roadmap workspace
+          </Link>
           <Link className={styles.secondaryButton} href={`/engagements/${state.engagement.id}/program`}>
             Back to program workspace
           </Link>

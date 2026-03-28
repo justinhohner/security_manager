@@ -39,6 +39,9 @@ export function ProgramWorkspace({ state }: { state: ProgramBaselineState }) {
           <Link className={styles.secondaryButton} href={`/engagements/${currentState.engagement.id}`}>
             Back to onboarding
           </Link>
+          <Link className={styles.secondaryButton} href={`/engagements/${currentState.engagement.id}/program/roadmap`}>
+            Open roadmap workspace
+          </Link>
           <Link className={styles.secondaryButton} href={`/engagements/${currentState.engagement.id}/assessment`}>
             Existing assessment view
           </Link>

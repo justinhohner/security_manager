@@ -9,3 +9,4 @@
 - Added read-only capability detail pages under the program workspace so capability cards now drill into rationale, evidence signals, and linked next actions.
 - Added saved initiative candidates to the program workspace so roadmap preview items can now be promoted into tracked planning records.
 - Added initiative detail pages and simple status transitions so saved initiative candidates can move into planned and in-progress states.
+- Added a dedicated roadmap workspace that groups saved initiatives by status and links into initiative detail from a stable planning list view.

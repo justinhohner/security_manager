@@ -254,3 +254,14 @@ export interface InitiativeDetailState {
     nextStatusOptions: Array<"planned" | "in-progress">;
   };
 }
+
+export interface RoadmapWorkspaceState {
+  engagement: Engagement;
+  initiatives: Initiative[];
+  counts: {
+    candidate: number;
+    planned: number;
+    inProgress: number;
+  };
+  nextFocus: string;
+}

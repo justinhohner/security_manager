@@ -1,11 +1,11 @@
 // ABOUTME: Persists engagement workflow state through Prisma for the first slice.
 // ABOUTME: Keeps onboarding, boundary state, assessment detail, and findings aligned.
 import { buildAssessmentState, buildFindingInput, buildRequirementDetailState } from "@/lib/assessment";
-import { buildCapabilityDetailState, buildInitiativeDetailState, buildInitiativeInput, buildProgramBaselineState } from "@/lib/program";
+import { buildCapabilityDetailState, buildInitiativeDetailState, buildInitiativeInput, buildProgramBaselineState, buildRoadmapWorkspaceState } from "@/lib/program";
 import { prisma } from "@/lib/prisma";
 import { BASELINE_QUESTIONS, SECTION_ORDER, buildBoundarySummary, buildFollowUpQuestions, buildSectionStatuses } from "@/lib/onboarding";
 import { buildManualSystems, mapAnswers, mapEvidenceReferences, resolveBoundarySummary, synchronizeBoundary } from "@/lib/persistence";
-import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type CapabilityDetailState, type Engagement, type EvidenceReferenceInput, type Finding, type Initiative, type InitiativeDetailState, type OnboardingState, type ProgramBaselineState, type RequirementDetailState, type SectionId } from "@/lib/types";
+import { type AnswerInput, type AssessmentState, type BoundarySummary, type BoundaryUpdateInput, type CapabilityDetailState, type Engagement, type EvidenceReferenceInput, type Finding, type Initiative, type InitiativeDetailState, type OnboardingState, type ProgramBaselineState, type RequirementDetailState, type RoadmapWorkspaceState, type SectionId } from "@/lib/types";
 
 export async function listEngagements(): Promise<Engagement[]> {
   const engagements = await prisma.engagement.findMany({
@@ -294,6 +294,28 @@ export async function updateInitiativeStatus(
   });
 
   return getInitiativeDetailState(engagementId, initiativeId);
+}
+
+export async function getRoadmapWorkspaceState(
+  engagementId: string,
+): Promise<RoadmapWorkspaceState | undefined> {
+  const engagement = await getEngagement(engagementId);
+
+  if (!engagement) {
+    return undefined;
+  }
+
+  const initiatives = await prisma.initiative.findMany({
+    where: { engagementId },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return buildRoadmapWorkspaceState({
+    engagement,
+    initiatives: initiatives.map(mapInitiativeRecord),
+  });
 }
 
 export async function updateBoundary(

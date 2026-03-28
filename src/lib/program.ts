@@ -10,6 +10,7 @@ import type {
   InitiativeDetailState,
   InitiativePreview,
   ProgramBaselineState,
+  RoadmapWorkspaceState,
 } from "@/lib/types";
 
 export function buildProgramBaselineState(input: {
@@ -95,6 +96,24 @@ export function buildInitiativeDetailState(input: {
       whyNow: `This initiative is currently prioritized as ${input.initiative.priority.replaceAll("-", " ")} because it addresses a near-term program need.`,
       nextStatusOptions: buildNextStatusOptions(input.initiative.status),
     },
+  };
+}
+
+export function buildRoadmapWorkspaceState(input: {
+  engagement: Engagement;
+  initiatives: Initiative[];
+}): RoadmapWorkspaceState {
+  const counts = {
+    candidate: input.initiatives.filter((initiative) => initiative.status === "candidate").length,
+    planned: input.initiatives.filter((initiative) => initiative.status === "planned").length,
+    inProgress: input.initiatives.filter((initiative) => initiative.status === "in-progress").length,
+  };
+
+  return {
+    engagement: input.engagement,
+    initiatives: input.initiatives,
+    counts,
+    nextFocus: buildRoadmapFocus(counts),
   };
 }
 
@@ -296,6 +315,22 @@ function buildNextStatusOptions(status: Initiative["status"]): Array<"planned" |
   }
 
   return [];
+}
+
+function buildRoadmapFocus(counts: RoadmapWorkspaceState["counts"]) {
+  if (counts.candidate > 0) {
+    return `${counts.candidate} candidate initiatives still need planning review.`;
+  }
+
+  if (counts.planned > 0) {
+    return `${counts.planned} planned initiatives are ready to move toward execution.`;
+  }
+
+  if (counts.inProgress > 0) {
+    return `${counts.inProgress} initiatives are currently in progress and need follow-through.`;
+  }
+
+  return "No saved initiatives exist yet.";
 }
 
 function buildEvidenceSignals(
