@@ -4,6 +4,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usesExplicitSave } from "@/lib/question-behavior";
 import type { Answer, OnboardingState, Question, SectionId } from "@/lib/types";
 import styles from "./engagement-workspace.module.css";
 
@@ -178,6 +179,7 @@ export function EngagementWorkspace({ initialState }: { initialState: Onboarding
               <div className={styles.questionCard} key={question.id}>
                 <QuestionField
                   answer={state.answers[question.id]}
+                  key={`${question.id}:${state.answers[question.id]?.value ?? ""}:${state.answers[question.id]?.score ?? ""}`}
                   evidenceDraft={evidenceDrafts[question.id] ?? { title: "", source: "", note: "" }}
                   evidenceReferences={state.evidenceReferences[question.id] ?? []}
                   isEvidenceSaving={isSaving === `evidence-${question.id}`}
@@ -196,6 +198,7 @@ export function EngagementWorkspace({ initialState }: { initialState: Onboarding
                   <div className={styles.followUp} key={followUp.id}>
                     <QuestionField
                       answer={state.answers[followUp.id]}
+                      key={`${followUp.id}:${state.answers[followUp.id]?.value ?? ""}:${state.answers[followUp.id]?.score ?? ""}`}
                       evidenceDraft={evidenceDrafts[followUp.id] ?? { title: "", source: "", note: "" }}
                       evidenceReferences={state.evidenceReferences[followUp.id] ?? []}
                       isEvidenceSaving={isSaving === `evidence-${followUp.id}`}
@@ -416,6 +419,8 @@ function QuestionField({
 }) {
   const requiresEvidence = question.evidencePolicy !== "none";
   const hasSavedAnswer = Boolean(answer?.value?.trim()) || typeof answer?.score === "number";
+  const [draftValue, setDraftValue] = useState(answer?.value ?? "");
+  const showExplicitSave = usesExplicitSave(question);
 
   return (
     <div>
@@ -426,18 +431,28 @@ function QuestionField({
       {question.responseType === "text" ? (
         <input
           className={styles.input}
-          defaultValue={answer?.value ?? ""}
-          onBlur={(event) => void onSave(question, { value: event.currentTarget.value })}
+          onBlur={(event) => {
+            if (!showExplicitSave) {
+              void onSave(question, { value: event.currentTarget.value });
+            }
+          }}
+          onChange={(event) => setDraftValue(event.currentTarget.value)}
           placeholder="Enter response"
+          value={draftValue}
         />
       ) : null}
       {question.responseType === "textarea" ? (
         <textarea
           className={styles.textarea}
-          defaultValue={answer?.value ?? ""}
-          onBlur={(event) => void onSave(question, { value: event.currentTarget.value })}
+          onBlur={(event) => {
+            if (!showExplicitSave) {
+              void onSave(question, { value: event.currentTarget.value });
+            }
+          }}
+          onChange={(event) => setDraftValue(event.currentTarget.value)}
           placeholder="Enter response"
           rows={4}
+          value={draftValue}
         />
       ) : null}
       {question.responseType === "boolean" ? (
@@ -480,8 +495,24 @@ function QuestionField({
         </div>
       ) : null}
       <p className={styles.saveState}>
-        {isSaving ? "Saving..." : hasSavedAnswer ? "Response saved." : "Response saves when you answer the field."}
+        {isSaving
+          ? "Saving..."
+          : hasSavedAnswer
+            ? "Response saved."
+            : showExplicitSave
+              ? "Response saves when you click Save response."
+              : "Response saves when you answer the field."}
       </p>
+
+      {showExplicitSave ? (
+        <button
+          className={styles.secondaryButton}
+          onClick={() => void onSave(question, { value: draftValue })}
+          type="button"
+        >
+          Save response
+        </button>
+      ) : null}
 
       {requiresEvidence ? (
         <div className={styles.evidencePanel}>
