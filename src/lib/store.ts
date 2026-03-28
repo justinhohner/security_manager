@@ -1,15 +1,11 @@
 // ABOUTME: Persists engagement workflow state through Prisma for the first slice.
 // ABOUTME: Keeps onboarding, boundary state, and seeded sample data aligned.
 import { prisma } from "@/lib/prisma";
-import { BASELINE_QUESTIONS, SECTION_ORDER, answerToRecord, buildBoundarySummary, buildFollowUpQuestions, buildSectionStatuses, buildSystemSnapshots } from "@/lib/onboarding";
-import { type Answer, type AnswerInput, type BoundarySummary, type Engagement, type OnboardingState, type SectionId } from "@/lib/types";
-
-const SEED_COMPANY_ID = "company-red-canyon";
-const SEED_ENGAGEMENT_ID = "eng-red-canyon-001";
+import { BASELINE_QUESTIONS, SECTION_ORDER, buildBoundarySummary, buildFollowUpQuestions, buildSectionStatuses } from "@/lib/onboarding";
+import { mapAnswers, synchronizeBoundary } from "@/lib/persistence";
+import { type AnswerInput, type BoundarySummary, type Engagement, type OnboardingState, type SectionId } from "@/lib/types";
 
 export async function listEngagements(): Promise<Engagement[]> {
-  await ensureSeedData();
-
   const engagements = await prisma.engagement.findMany({
     include: {
       company: true,
@@ -54,8 +50,6 @@ export async function createEngagement(): Promise<Engagement> {
 }
 
 export async function getEngagement(engagementId: string): Promise<Engagement | undefined> {
-  await ensureSeedData();
-
   const engagement = await prisma.engagement.findUnique({
     where: { id: engagementId },
     include: { company: true },
@@ -78,8 +72,6 @@ export async function setCurrentSection(
 }
 
 export async function getOnboardingState(engagementId: string): Promise<OnboardingState | undefined> {
-  await ensureSeedData();
-
   const engagement = await prisma.engagement.findUnique({
     where: { id: engagementId },
     include: {
@@ -165,121 +157,6 @@ export async function saveAnswer(
 export async function getBoundarySummary(engagementId: string): Promise<BoundarySummary | undefined> {
   const state = await getOnboardingState(engagementId);
   return state?.boundaryPreview;
-}
-
-async function ensureSeedData() {
-  const existingCompany = await prisma.company.findUnique({
-    where: { id: SEED_COMPANY_ID },
-  });
-
-  if (existingCompany) {
-    return;
-  }
-
-  await prisma.company.create({
-    data: {
-      id: SEED_COMPANY_ID,
-      legalName: "Red Canyon Manufacturing",
-      engagements: {
-        create: {
-          id: SEED_ENGAGEMENT_ID,
-          engagementName: "Red Canyon CMMC readiness",
-          targetFrameworks: ["CMMC", "NIST SP 800-171", "NIST SP 800-171A"],
-          targetCmmcLevel: "Level 2",
-          currentStage: "onboarding",
-          currentSectionId: SECTION_ORDER[0].id,
-          answers: {
-            create: [
-              {
-                questionId: "engagement-name",
-                value: "Red Canyon CMMC readiness",
-              },
-              {
-                questionId: "target-cmmc-level",
-                value: "Level 2",
-              },
-              {
-                questionId: "handles-fci",
-                value: "true",
-              },
-            ],
-          },
-        },
-      },
-    },
-  });
-
-  await synchronizeBoundary(SEED_ENGAGEMENT_ID);
-}
-
-function mapAnswers(records: Array<{
-  id: string;
-  engagementId: string;
-  questionId: string;
-  score: number | null;
-  value: string | null;
-  rationale: string | null;
-}>): Record<string, Answer> {
-  return Object.fromEntries(
-    records.map((record) => [
-      record.questionId,
-      answerToRecord(record.engagementId, {
-        questionId: record.questionId,
-        score: record.score ?? undefined,
-        value: record.value ?? undefined,
-        rationale: record.rationale ?? undefined,
-      }),
-    ]),
-  );
-}
-
-async function synchronizeBoundary(engagementId: string) {
-  const answerRecords = await prisma.answer.findMany({
-    where: { engagementId },
-  });
-
-  const answerMap = mapAnswers(answerRecords);
-  const boundary = buildBoundarySummary(answerMap);
-  const systems = buildSystemSnapshots(answerMap);
-
-  await prisma.$transaction([
-    prisma.assessmentBoundary.upsert({
-      where: { engagementId },
-      create: {
-        engagementId,
-        summary: boundary.summary,
-        includesCui: boundary.includesCui,
-        includesFci: boundary.includesFci,
-        assumptions: boundary.assumptions,
-        exclusions: boundary.exclusions,
-        unresolvedScope: boundary.unresolvedScopeQuestions,
-        confidence: boundary.confidence,
-      },
-      update: {
-        summary: boundary.summary,
-        includesCui: boundary.includesCui,
-        includesFci: boundary.includesFci,
-        assumptions: boundary.assumptions,
-        exclusions: boundary.exclusions,
-        unresolvedScope: boundary.unresolvedScopeQuestions,
-        confidence: boundary.confidence,
-      },
-    }),
-    prisma.system.deleteMany({
-      where: { engagementId },
-    }),
-    prisma.system.createMany({
-      data: systems.map((system) => ({
-        engagementId,
-        name: system.name,
-        storesCui: system.storesCui,
-        processesCui: system.processesCui,
-        transmitsCui: system.transmitsCui,
-        protectsCui: system.protectsCui,
-      })),
-      skipDuplicates: true,
-    }),
-  ]);
 }
 
 async function synchronizeEngagementFields(engagementId: string, input: AnswerInput) {
