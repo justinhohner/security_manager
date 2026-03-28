@@ -230,6 +230,7 @@ export interface Initiative {
   targetDate?: string;
   notes?: string;
   blockers?: string;
+  outcome?: string;
   createdAt: string;
 }
 

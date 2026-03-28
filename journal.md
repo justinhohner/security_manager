@@ -15,3 +15,4 @@
 - Added lightweight initiative notes and blockers to the detail workflow so roadmap items can carry execution context without becoming a full task management system.
 - Surfaced blocked initiative state in the roadmap summary and list so consultants can spot stuck work directly from the roadmap workspace.
 - Added a lightweight completed status for initiatives so the roadmap can distinguish active execution from finished work and support basic outcome review.
+- Added a lightweight outcome field for initiatives so completed work can capture what changed or was delivered instead of ending as a bare status transition.

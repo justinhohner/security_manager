@@ -30,6 +30,7 @@ export async function PATCH(
     targetDate?: string;
     notes?: string;
     blockers?: string;
+    outcome?: string;
   };
   const state =
     body.status && Object.keys(body).length === 1

@@ -15,6 +15,7 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
   const [targetDate, setTargetDate] = useState(initialState.initiative.targetDate ?? "");
   const [notes, setNotes] = useState(initialState.initiative.notes ?? "");
   const [blockers, setBlockers] = useState(initialState.initiative.blockers ?? "");
+  const [outcome, setOutcome] = useState(initialState.initiative.outcome ?? "");
 
   async function handleStatusChange(status: "planned" | "in-progress" | "completed") {
     setSavingStatus(status);
@@ -45,7 +46,7 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ owner, targetDate, notes, blockers }),
+        body: JSON.stringify({ owner, targetDate, notes, blockers, outcome }),
       },
     );
     const data = (await response.json()) as { state: InitiativeDetailState };
@@ -55,6 +56,7 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
     setTargetDate(data.state.initiative.targetDate ?? "");
     setNotes(data.state.initiative.notes ?? "");
     setBlockers(data.state.initiative.blockers ?? "");
+    setOutcome(data.state.initiative.outcome ?? "");
     setIsSavingPlan(false);
   }
 
@@ -94,6 +96,11 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
         <p className={styles.copy}>
           <strong>Blockers:</strong> {state.initiative.blockers ?? "No blockers recorded"}
         </p>
+        {state.initiative.outcome ? (
+          <p className={styles.copy}>
+            <strong>Outcome:</strong> {state.initiative.outcome}
+          </p>
+        ) : null}
         <p className={styles.copy}>
           <strong>Why now:</strong> {state.initiative.whyNow}
         </p>
@@ -138,6 +145,16 @@ export function InitiativeDetailWorkspace({ initialState }: { initialState: Init
               placeholder="Capture current blockers or dependencies"
               rows={4}
               value={blockers}
+            />
+          </label>
+          <label className={styles.field}>
+            <span>Outcome</span>
+            <textarea
+              className={styles.textarea}
+              onChange={(event) => setOutcome(event.currentTarget.value)}
+              placeholder="Capture what changed, what was validated, or what was delivered"
+              rows={4}
+              value={outcome}
             />
           </label>
         </div>

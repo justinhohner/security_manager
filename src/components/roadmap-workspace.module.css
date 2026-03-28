@@ -61,6 +61,14 @@
   padding: 10px 12px;
 }
 
+.outcome {
+  color: #12442f;
+  background: #eaf8ef;
+  border: 1px solid #a8d8b8;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
 .summaryGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

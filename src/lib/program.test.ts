@@ -164,6 +164,26 @@ describe("buildInitiativeDetailState", () => {
 
     expect(detail.initiative.nextStatusOptions).toEqual(["completed"]);
   });
+
+  it("carries outcome detail for completed initiatives", () => {
+    const detail = buildInitiativeDetailState({
+      engagement,
+      initiative: {
+        id: "initiative-3",
+        engagementId: "eng-1",
+        title: "Close out inventory cleanup",
+        summary: "Summary",
+        priority: "plan-this-quarter",
+        targetCapabilityIds: ["asset-configuration"],
+        status: "completed",
+        outcome: "Confirmed system ownership list and reconciled missing endpoint records.",
+        createdAt: "2026-03-28T00:00:00.000Z",
+      },
+    });
+
+    expect(detail.initiative.outcome).toBe("Confirmed system ownership list and reconciled missing endpoint records.");
+    expect(detail.initiative.nextStatusOptions).toEqual([]);
+  });
 });
 
 describe("buildRoadmapWorkspaceState", () => {

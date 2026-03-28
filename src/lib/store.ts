@@ -304,6 +304,7 @@ export async function updateInitiativePlan(
     targetDate?: string;
     notes?: string;
     blockers?: string;
+    outcome?: string;
     status?: Initiative["status"];
   },
 ): Promise<InitiativeDetailState | undefined> {
@@ -322,6 +323,7 @@ export async function updateInitiativePlan(
       targetDate: input.targetDate?.trim() || null,
       notes: input.notes?.trim() || null,
       blockers: input.blockers?.trim() || null,
+      outcome: input.outcome?.trim() || null,
       status: input.status ?? existing.status,
     },
   });
@@ -654,6 +656,7 @@ function mapInitiativeRecord(record: InitiativeRecord): Initiative {
     targetDate: record.targetDate ?? undefined,
     notes: record.notes ?? undefined,
     blockers: record.blockers ?? undefined,
+    outcome: record.outcome ?? undefined,
     createdAt: record.createdAt.toISOString(),
   };
 }
@@ -686,5 +689,6 @@ type InitiativeRecord = {
   targetDate: string | null;
   notes: string | null;
   blockers: string | null;
+  outcome: string | null;
   createdAt: Date;
 };

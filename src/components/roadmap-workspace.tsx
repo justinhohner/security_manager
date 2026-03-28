@@ -69,6 +69,11 @@ export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
                   <strong>Blocked:</strong> {initiative.blockers}
                 </p>
               ) : null}
+              {initiative.status === "completed" && initiative.outcome?.trim() ? (
+                <p className={styles.outcome}>
+                  <strong>Outcome:</strong> {initiative.outcome}
+                </p>
+              ) : null}
               <Link
                 className={styles.detailLink}
                 href={`/engagements/${state.engagement.id}/program/initiatives/${initiative.id}`}
