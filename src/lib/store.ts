@@ -376,6 +376,10 @@ export async function createFindingCandidate(
       title: input.title,
       statement: input.statement,
       impact: input.impact,
+      evidenceUsed: input.evidenceUsed,
+      missingSupport: input.missingSupport,
+      confidence: input.confidence,
+      priorityRationale: input.priorityRationale,
       status: input.status,
     },
   });
@@ -443,6 +447,10 @@ function mapFindingRecord(record: FindingRecord): Finding {
     title: record.title,
     statement: record.statement,
     impact: record.impact,
+    evidenceUsed: record.evidenceUsed,
+    missingSupport: record.missingSupport,
+    confidence: record.confidence,
+    priorityRationale: record.priorityRationale,
     status: record.status,
     createdAt: record.createdAt.toISOString(),
   };
@@ -456,6 +464,10 @@ type FindingRecord = {
   title: string;
   statement: string;
   impact: string;
+  evidenceUsed: string[];
+  missingSupport: string[];
+  confidence: string;
+  priorityRationale: string;
   status: string;
   createdAt: Date;
 };

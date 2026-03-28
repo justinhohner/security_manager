@@ -229,12 +229,47 @@ function buildFindingCandidate(requirement: RequirementAssessment) {
 }
 
 export function buildFindingInput(requirement: RequirementDetail): FindingInput {
+  const evidenceUsed = requirement.questionDetails.flatMap((question) =>
+    question.evidenceReferences.map((reference) => `${reference.title} (${reference.source})`),
+  );
+  const missingSupport = requirement.questionDetails
+    .filter((question) => !question.answered)
+    .map((question) => question.prompt);
+
   return {
     requirementId: requirement.id,
     controlId: requirement.controlId,
     title: requirement.findingCandidate.title,
     statement: requirement.findingCandidate.statement,
     impact: requirement.findingCandidate.impact,
+    evidenceUsed,
+    missingSupport,
+    confidence: buildFindingConfidence(requirement.status),
+    priorityRationale: buildPriorityRationale(requirement.status),
     status: "candidate",
   };
+}
+
+function buildFindingConfidence(status: RequirementAssessmentStatus) {
+  if (status === "supported") {
+    return "high";
+  }
+
+  if (status === "partial") {
+    return "medium";
+  }
+
+  return "low";
+}
+
+function buildPriorityRationale(status: RequirementAssessmentStatus) {
+  if (status === "supported") {
+    return "This requirement area has enough mapped support to review soon, but assessor validation is still needed.";
+  }
+
+  if (status === "partial") {
+    return "This requirement area is only partially supported, so follow-up work is likely before review can finish.";
+  }
+
+  return "This requirement area has no mapped support yet, so additional discovery is needed before reliable review can begin.";
 }

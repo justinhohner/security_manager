@@ -122,6 +122,10 @@ model Finding {
   title          String
   statement      String
   impact         String
+  evidenceUsed   String[]
+  missingSupport String[]
+  confidence     String
+  priorityRationale String
   status         String      @default("candidate")
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt

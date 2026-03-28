@@ -122,6 +122,20 @@ export function RequirementDetailWorkspace({ detail }: { detail: RequirementDeta
                   <li key={finding.id}>
                     <strong>{finding.title}</strong>
                     <span>{finding.statement}</span>
+                    <span>
+                      <strong>Confidence:</strong> {finding.confidence}
+                    </span>
+                    <span>
+                      <strong>Priority rationale:</strong> {finding.priorityRationale}
+                    </span>
+                    <span>
+                      <strong>Evidence used:</strong>{" "}
+                      {finding.evidenceUsed.length > 0 ? finding.evidenceUsed.join(", ") : "No saved evidence support."}
+                    </span>
+                    <span>
+                      <strong>Missing support:</strong>{" "}
+                      {finding.missingSupport.length > 0 ? finding.missingSupport.join(", ") : "No missing support recorded."}
+                    </span>
                     <small>
                       {finding.status} · {formatCreatedAt(finding.createdAt)}
                     </small>

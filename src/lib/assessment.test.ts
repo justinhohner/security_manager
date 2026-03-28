@@ -71,6 +71,10 @@ describe("buildRequirementDetailState", () => {
           title: "Saved coverage gap",
           statement: "The current context answers are incomplete.",
           impact: "Moderate concern because context remains partial.",
+          evidenceUsed: ["CUI handling notes (SharePoint)"],
+          missingSupport: ["What CMMC level is the client targeting?"],
+          confidence: "medium",
+          priorityRationale: "Partial prompt coverage creates review uncertainty.",
           status: "candidate",
           createdAt: "2026-03-27T00:00:00.000Z",
         },
@@ -82,6 +86,7 @@ describe("buildRequirementDetailState", () => {
     expect(detail?.requirement.findingCandidate.title).toBe("Potential evidence or coverage gap");
     expect(detail?.requirement.findings).toHaveLength(1);
     expect(detail?.requirement.findings[0]?.title).toBe("Saved coverage gap");
+    expect(detail?.requirement.findings[0]?.confidence).toBe("medium");
   });
 });
 
@@ -89,19 +94,46 @@ describe("buildFindingInput", () => {
   it("creates a candidate finding payload from requirement detail", () => {
     const detail = buildRequirementDetailState({
       engagement,
-      requirementId: "starter-boundary-01",
-      answers: {},
-      evidenceByQuestionId: {},
+      requirementId: "starter-context-01",
+      answers: {
+        "target-cmmc-level": {
+          id: "answer-1",
+          engagementId: "eng-1",
+          questionId: "target-cmmc-level",
+          value: "Level 2",
+        },
+        "handles-cui": {
+          id: "answer-2",
+          engagementId: "eng-1",
+          questionId: "handles-cui",
+          value: "true",
+        },
+      },
+      evidenceByQuestionId: {
+        "handles-cui": [
+          {
+            id: "evidence-1",
+            engagementId: "eng-1",
+            questionId: "handles-cui",
+            title: "CUI handling notes",
+            source: "SharePoint",
+          },
+        ],
+      },
       findings: [],
     });
 
     const finding = buildFindingInput(detail!.requirement);
 
     expect(finding).toMatchObject({
-      requirementId: "starter-boundary-01",
-      controlId: "SCOPING-01",
-      title: "Potential unmapped or unsupported requirement area",
+      requirementId: "starter-context-01",
+      controlId: "CONTEXT-01",
+      title: "Potential evidence or coverage gap",
       status: "candidate",
+      confidence: "medium",
+      priorityRationale: "This requirement area is only partially supported, so follow-up work is likely before review can finish.",
     });
+    expect(finding.evidenceUsed).toEqual(["CUI handling notes (SharePoint)"]);
+    expect(finding.missingSupport).toContain("Does the client handle FCI in scope for this engagement?");
   });
 });

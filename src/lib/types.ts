@@ -80,6 +80,10 @@ export interface Finding {
   title: string;
   statement: string;
   impact: string;
+  evidenceUsed: string[];
+  missingSupport: string[];
+  confidence: string;
+  priorityRationale: string;
   status: string;
   createdAt: string;
 }
@@ -90,6 +94,10 @@ export interface FindingInput {
   title: string;
   statement: string;
   impact: string;
+  evidenceUsed: string[];
+  missingSupport: string[];
+  confidence: string;
+  priorityRationale: string;
   status: string;
 }
 
