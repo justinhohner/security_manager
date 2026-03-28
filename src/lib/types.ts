@@ -53,6 +53,23 @@ export interface Answer extends AnswerInput {
   engagementId: string;
 }
 
+export interface EvidenceReference {
+  id: string;
+  engagementId: string;
+  answerId?: string;
+  questionId?: string;
+  title: string;
+  source: string;
+  note?: string;
+}
+
+export interface EvidenceReferenceInput {
+  questionId: string;
+  title: string;
+  source: string;
+  note?: string;
+}
+
 export interface SectionStatus {
   id: SectionId;
   title: string;
@@ -90,5 +107,6 @@ export interface OnboardingState {
   questions: Question[];
   followUpQuestions: Record<string, Question[]>;
   answers: Record<string, Answer>;
+  evidenceReferences: Record<string, EvidenceReference[]>;
   boundaryPreview: BoundarySummary;
 }

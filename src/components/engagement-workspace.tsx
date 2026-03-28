@@ -14,6 +14,9 @@ export function EngagementWorkspace({ initialState }: { initialState: Onboarding
   const [state, setState] = useState(initialState);
   const [isSaving, setIsSaving] = useState<string | null>(null);
   const [isBoundaryEditing, setIsBoundaryEditing] = useState(false);
+  const [evidenceDrafts, setEvidenceDrafts] = useState<Record<string, { title: string; source: string; note: string }>>(
+    {},
+  );
   const [boundaryDraft, setBoundaryDraft] = useState({
     summary: initialState.boundaryPreview.summary,
     assumptions: initialState.boundaryPreview.assumptions.join("\n"),
@@ -81,6 +84,38 @@ export function EngagementWorkspace({ initialState }: { initialState: Onboarding
     setIsSaving(null);
   }
 
+  async function handleEvidenceSave(questionId: string) {
+    const draft = evidenceDrafts[questionId];
+
+    if (!draft?.title.trim() || !draft.source.trim()) {
+      return;
+    }
+
+    setIsSaving(`evidence-${questionId}`);
+
+    const response = await fetch(`/api/engagements/${state.engagement.id}/evidence-references`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        questionId,
+        title: draft.title,
+        source: draft.source,
+        note: draft.note,
+      }),
+    });
+
+    const data = (await response.json()) as SaveAnswerResponse;
+    setState(data.state);
+    setEvidenceDrafts((current) => ({
+      ...current,
+      [questionId]: { title: "", source: "", note: "" },
+    }));
+    syncBoundaryDraft(data.state);
+    setIsSaving(null);
+  }
+
   function syncBoundaryDraft(nextState: OnboardingState) {
     setBoundaryDraft({
       summary: nextState.boundaryPreview.summary,
@@ -139,6 +174,16 @@ export function EngagementWorkspace({ initialState }: { initialState: Onboarding
               <div className={styles.questionCard} key={question.id}>
                 <QuestionField
                   answer={state.answers[question.id]}
+                  evidenceDraft={evidenceDrafts[question.id] ?? { title: "", source: "", note: "" }}
+                  evidenceReferences={state.evidenceReferences[question.id] ?? []}
+                  isEvidenceSaving={isSaving === `evidence-${question.id}`}
+                  onEvidenceDraftChange={(nextDraft) =>
+                    setEvidenceDrafts((current) => ({
+                      ...current,
+                      [question.id]: nextDraft,
+                    }))
+                  }
+                  onEvidenceSave={handleEvidenceSave}
                   isSaving={isSaving === question.id}
                   onSave={handleAnswerSave}
                   question={question}
@@ -147,6 +192,16 @@ export function EngagementWorkspace({ initialState }: { initialState: Onboarding
                   <div className={styles.followUp} key={followUp.id}>
                     <QuestionField
                       answer={state.answers[followUp.id]}
+                      evidenceDraft={evidenceDrafts[followUp.id] ?? { title: "", source: "", note: "" }}
+                      evidenceReferences={state.evidenceReferences[followUp.id] ?? []}
+                      isEvidenceSaving={isSaving === `evidence-${followUp.id}`}
+                      onEvidenceDraftChange={(nextDraft) =>
+                        setEvidenceDrafts((current) => ({
+                          ...current,
+                          [followUp.id]: nextDraft,
+                        }))
+                      }
+                      onEvidenceSave={handleEvidenceSave}
                       isSaving={isSaving === followUp.id}
                       onSave={handleAnswerSave}
                       question={followUp}
@@ -332,11 +387,26 @@ function splitLines(value: string) {
 function QuestionField({
   question,
   answer,
+  evidenceReferences,
+  evidenceDraft,
+  onEvidenceDraftChange,
+  onEvidenceSave,
+  isEvidenceSaving,
   onSave,
   isSaving,
 }: {
   question: Question;
   answer?: Answer;
+  evidenceReferences: Array<{
+    id: string;
+    title: string;
+    source: string;
+    note?: string;
+  }>;
+  evidenceDraft: { title: string; source: string; note: string };
+  onEvidenceDraftChange: (draft: { title: string; source: string; note: string }) => void;
+  onEvidenceSave: (questionId: string) => Promise<void>;
+  isEvidenceSaving: boolean;
   onSave: (question: Question, answer: Partial<Answer>) => Promise<void>;
   isSaving: boolean;
 }) {
@@ -403,6 +473,58 @@ function QuestionField({
         </div>
       ) : null}
       <p className={styles.saveState}>{isSaving ? "Saving..." : "Saved through the workflow API."}</p>
+
+      <div className={styles.evidencePanel}>
+        <p className={styles.evidenceHeading}>Evidence references</p>
+        {evidenceReferences.length > 0 ? (
+          <ul className={styles.evidenceList}>
+            {evidenceReferences.map((reference) => (
+              <li key={reference.id}>
+                <strong>{reference.title}</strong>
+                <span>{reference.source}</span>
+                {reference.note ? <small>{reference.note}</small> : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.saveState}>No evidence references linked yet.</p>
+        )}
+
+        <div className={styles.evidenceDraft}>
+          <input
+            className={styles.input}
+            onChange={(event) =>
+              onEvidenceDraftChange({ ...evidenceDraft, title: event.currentTarget.value })
+            }
+            placeholder="Evidence title"
+            value={evidenceDraft.title}
+          />
+          <input
+            className={styles.input}
+            onChange={(event) =>
+              onEvidenceDraftChange({ ...evidenceDraft, source: event.currentTarget.value })
+            }
+            placeholder="Source or location"
+            value={evidenceDraft.source}
+          />
+          <textarea
+            className={styles.textarea}
+            onChange={(event) =>
+              onEvidenceDraftChange({ ...evidenceDraft, note: event.currentTarget.value })
+            }
+            placeholder="Short note"
+            rows={2}
+            value={evidenceDraft.note}
+          />
+          <button
+            className={styles.secondaryButton}
+            onClick={() => void onEvidenceSave(question.id)}
+            type="button"
+          >
+            {isEvidenceSaving ? "Saving evidence..." : "Add evidence reference"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

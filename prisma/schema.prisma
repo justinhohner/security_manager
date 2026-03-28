@@ -30,6 +30,7 @@ model Engagement {
   company            Company             @relation(fields: [companyId], references: [id])
   boundary           AssessmentBoundary?
   answers            Answer[]
+  evidenceReferences EvidenceReference[]
   systems            System[]
   decisions          Decision[]
 }
@@ -85,8 +86,22 @@ model Answer {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   engagement      Engagement  @relation(fields: [engagementId], references: [id])
+  evidenceReferences EvidenceReference[]
 
   @@unique([engagementId, questionId])
+}
+
+model EvidenceReference {
+  id            String      @id @default(cuid())
+  engagementId  String
+  answerId      String?
+  title         String
+  source        String
+  note          String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  engagement    Engagement  @relation(fields: [engagementId], references: [id])
+  answer        Answer?     @relation(fields: [answerId], references: [id])
 }
 
 model Decision {

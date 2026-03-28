@@ -2,8 +2,8 @@
 // ABOUTME: Keeps onboarding, boundary state, and seeded sample data aligned.
 import { prisma } from "@/lib/prisma";
 import { BASELINE_QUESTIONS, SECTION_ORDER, buildBoundarySummary, buildFollowUpQuestions, buildSectionStatuses } from "@/lib/onboarding";
-import { buildManualSystems, mapAnswers, resolveBoundarySummary, synchronizeBoundary } from "@/lib/persistence";
-import { type AnswerInput, type BoundarySummary, type BoundaryUpdateInput, type Engagement, type OnboardingState, type SectionId } from "@/lib/types";
+import { buildManualSystems, mapAnswers, mapEvidenceReferences, resolveBoundarySummary, synchronizeBoundary } from "@/lib/persistence";
+import { type AnswerInput, type BoundarySummary, type BoundaryUpdateInput, type Engagement, type EvidenceReferenceInput, type OnboardingState, type SectionId } from "@/lib/types";
 
 export async function listEngagements(): Promise<Engagement[]> {
   const engagements = await prisma.engagement.findMany({
@@ -78,6 +78,15 @@ export async function getOnboardingState(engagementId: string): Promise<Onboardi
       company: true,
       answers: true,
       boundary: true,
+      evidenceReferences: {
+        include: {
+          answer: {
+            select: {
+              questionId: true,
+            },
+          },
+        },
+      },
       systems: true,
     },
   });
@@ -106,6 +115,7 @@ export async function getOnboardingState(engagementId: string): Promise<Onboardi
     questions: BASELINE_QUESTIONS,
     followUpQuestions: buildFollowUpQuestions(answerMap),
     answers: answerMap,
+    evidenceReferences: mapEvidenceReferences(engagement.evidenceReferences),
     boundaryPreview,
   };
 }
@@ -243,6 +253,36 @@ export async function updateBoundary(
       skipDuplicates: true,
     }),
   ]);
+
+  return getOnboardingState(engagementId);
+}
+
+export async function createEvidenceReference(
+  engagementId: string,
+  input: EvidenceReferenceInput,
+): Promise<OnboardingState | undefined> {
+  const answer = await prisma.answer.findUnique({
+    where: {
+      engagementId_questionId: {
+        engagementId,
+        questionId: input.questionId,
+      },
+    },
+  });
+
+  if (!answer) {
+    return undefined;
+  }
+
+  await prisma.evidenceReference.create({
+    data: {
+      engagementId,
+      answerId: answer.id,
+      title: input.title.trim(),
+      source: input.source.trim(),
+      note: input.note?.trim() || null,
+    },
+  });
 
   return getOnboardingState(engagementId);
 }

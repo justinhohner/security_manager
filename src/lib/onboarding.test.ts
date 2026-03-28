@@ -2,7 +2,7 @@
 // ABOUTME: Protects the core slice logic from silent behavior drift.
 import { describe, expect, it } from "vitest";
 import { answerToRecord, buildBoundarySummary, buildFollowUpQuestions, buildSystemSnapshots } from "@/lib/onboarding";
-import { buildManualSystems, resolveBoundarySummary } from "@/lib/persistence";
+import { buildManualSystems, mapEvidenceReferences, resolveBoundarySummary } from "@/lib/persistence";
 import type { Answer } from "@/lib/types";
 
 describe("buildFollowUpQuestions", () => {
@@ -153,5 +153,37 @@ describe("resolveBoundarySummary", () => {
     expect(resolved.exclusions).toEqual(["Derived exclusion"]);
     expect(resolved.confidence).toBe(4);
     expect(resolved.unresolvedScopeQuestions).toEqual(["Derived gap"]);
+  });
+});
+
+describe("mapEvidenceReferences", () => {
+  it("groups evidence references by question id for the onboarding workspace", () => {
+    expect(
+      mapEvidenceReferences([
+        {
+          id: "ev-1",
+          engagementId: "eng-1",
+          answerId: "answer-1",
+          title: "SSP",
+          source: "SharePoint",
+          note: "Reviewed with client",
+          answer: {
+            questionId: "handles-cui",
+          },
+        },
+      ]),
+    ).toEqual({
+      "handles-cui": [
+        {
+          id: "ev-1",
+          engagementId: "eng-1",
+          answerId: "answer-1",
+          questionId: "handles-cui",
+          title: "SSP",
+          source: "SharePoint",
+          note: "Reviewed with client",
+        },
+      ],
+    });
   });
 });

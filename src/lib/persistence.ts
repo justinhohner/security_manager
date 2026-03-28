@@ -2,7 +2,7 @@
 // ABOUTME: Keeps boundary derivation and answer mapping consistent across flows.
 import { prisma } from "@/lib/prisma";
 import { answerToRecord, buildBoundarySummary, buildSystemSnapshots } from "@/lib/onboarding";
-import { type Answer, type BoundarySummary } from "@/lib/types";
+import { type Answer, type BoundarySummary, type EvidenceReference } from "@/lib/types";
 
 export function mapAnswers(records: Array<{
   engagementId: string;
@@ -94,6 +94,40 @@ export async function synchronizeBoundary(engagementId: string) {
       skipDuplicates: true,
     }),
   ]);
+}
+
+export function mapEvidenceReferences(
+  records: Array<{
+    id: string;
+    engagementId: string;
+    answerId: string | null;
+    title: string;
+    source: string;
+    note: string | null;
+    answer?: {
+      questionId: string;
+    } | null;
+  }>,
+): Record<string, EvidenceReference[]> {
+  const mapped = records.map((record) => ({
+    id: record.id,
+    engagementId: record.engagementId,
+    answerId: record.answerId ?? undefined,
+    questionId: record.answer?.questionId,
+    title: record.title,
+    source: record.source,
+    note: record.note ?? undefined,
+  }));
+
+  return mapped.reduce<Record<string, EvidenceReference[]>>((accumulator, reference) => {
+    if (!reference.questionId) {
+      return accumulator;
+    }
+
+    const current = accumulator[reference.questionId] ?? [];
+    accumulator[reference.questionId] = [...current, reference];
+    return accumulator;
+  }, {});
 }
 
 export function buildManualSystems(inScopeSystems: string[], protectedSystems: string[]) {
