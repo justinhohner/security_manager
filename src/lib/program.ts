@@ -103,15 +103,16 @@ export function buildRoadmapWorkspaceState(input: {
   engagement: Engagement;
   initiatives: Initiative[];
 }): RoadmapWorkspaceState {
+  const initiatives = [...input.initiatives].sort(byRoadmapOrder);
   const counts = {
-    candidate: input.initiatives.filter((initiative) => initiative.status === "candidate").length,
-    planned: input.initiatives.filter((initiative) => initiative.status === "planned").length,
-    inProgress: input.initiatives.filter((initiative) => initiative.status === "in-progress").length,
+    candidate: initiatives.filter((initiative) => initiative.status === "candidate").length,
+    planned: initiatives.filter((initiative) => initiative.status === "planned").length,
+    inProgress: initiatives.filter((initiative) => initiative.status === "in-progress").length,
   };
 
   return {
     engagement: input.engagement,
-    initiatives: input.initiatives,
+    initiatives,
     counts,
     nextFocus: buildRoadmapFocus(counts),
   };
@@ -410,4 +411,49 @@ function byStrongestFirst(
   }
 
   return right.confidenceScore - left.confidenceScore;
+}
+
+function byRoadmapOrder(left: Initiative, right: Initiative) {
+  const leftHasTargetDate = Boolean(left.targetDate);
+  const rightHasTargetDate = Boolean(right.targetDate);
+
+  if (leftHasTargetDate !== rightHasTargetDate) {
+    return leftHasTargetDate ? -1 : 1;
+  }
+
+  if (left.targetDate && right.targetDate && left.targetDate !== right.targetDate) {
+    return left.targetDate.localeCompare(right.targetDate);
+  }
+
+  const priorityDifference = priorityRank(left.priority) - priorityRank(right.priority);
+  if (priorityDifference !== 0) {
+    return priorityDifference;
+  }
+
+  const statusDifference = statusRank(left.status) - statusRank(right.status);
+  if (statusDifference !== 0) {
+    return statusDifference;
+  }
+
+  return right.createdAt.localeCompare(left.createdAt);
+}
+
+function priorityRank(priority: Initiative["priority"]) {
+  const ranks: Record<Initiative["priority"], number> = {
+    "do-now": 0,
+    "do-next": 1,
+    "plan-this-quarter": 2,
+  };
+
+  return ranks[priority];
+}
+
+function statusRank(status: Initiative["status"]) {
+  const ranks: Record<Initiative["status"], number> = {
+    candidate: 0,
+    planned: 1,
+    "in-progress": 2,
+  };
+
+  return ranks[status];
 }

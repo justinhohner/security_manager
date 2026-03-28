@@ -52,6 +52,12 @@ export function RoadmapWorkspace({ state }: { state: RoadmapWorkspaceState }) {
               <p className={styles.copy}>
                 <strong>Status:</strong> {initiative.status}
               </p>
+              <p className={styles.copy}>
+                <strong>Owner:</strong> {initiative.owner?.trim() ? initiative.owner : "Unassigned"}
+              </p>
+              <p className={styles.copy}>
+                <strong>Target date:</strong> {initiative.targetDate ?? "Not scheduled"}
+              </p>
               <Link
                 className={styles.detailLink}
                 href={`/engagements/${state.engagement.id}/program/initiatives/${initiative.id}`}

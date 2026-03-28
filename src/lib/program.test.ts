@@ -179,4 +179,54 @@ describe("buildRoadmapWorkspaceState", () => {
     });
     expect(state.nextFocus).toContain("1 candidate");
   });
+
+  it("sorts initiatives into a workable action-plan order", () => {
+    const state = buildRoadmapWorkspaceState({
+      engagement,
+      initiatives: [
+        {
+          id: "initiative-1",
+          engagementId: "eng-1",
+          title: "Late governance cleanup",
+          summary: "Summary",
+          priority: "plan-this-quarter",
+          targetCapabilityIds: ["governance-policy"],
+          status: "planned",
+          owner: "Justin",
+          targetDate: "2026-05-30",
+          createdAt: "2026-03-28T00:00:00.000Z",
+        },
+        {
+          id: "initiative-2",
+          engagementId: "eng-1",
+          title: "Immediate identity review",
+          summary: "Summary",
+          priority: "do-now",
+          targetCapabilityIds: ["identity-access"],
+          status: "candidate",
+          owner: "Alex",
+          targetDate: "2026-04-15",
+          createdAt: "2026-03-28T01:00:00.000Z",
+        },
+        {
+          id: "initiative-3",
+          engagementId: "eng-1",
+          title: "Future inventory expansion",
+          summary: "Summary",
+          priority: "plan-this-quarter",
+          targetCapabilityIds: ["asset-configuration"],
+          status: "candidate",
+          createdAt: "2026-03-28T02:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(state.initiatives.map((initiative) => initiative.id)).toEqual([
+      "initiative-2",
+      "initiative-1",
+      "initiative-3",
+    ]);
+    expect(state.initiatives[0]?.owner).toBe("Alex");
+    expect(state.initiatives[0]?.targetDate).toBe("2026-04-15");
+  });
 });
